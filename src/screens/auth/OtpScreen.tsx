@@ -30,7 +30,7 @@ const OtpScreen = () => {
   const { phoneNumber } = route.params;
 
   const loginData = useSelector((state: any) => state.authReducer.loginData);
-  console.log("loginData", loginData);
+  console.log('loginData', loginData);
 
   useEffect(() => {
     if (loginData?.otp) {
@@ -41,10 +41,9 @@ const OtpScreen = () => {
         visibilityTime: 6000,
       });
       // Pre-fill for convenience if desired, or just show toast
-      // setCode(String(loginData.otp)); 
+      // setCode(String(loginData.otp));
     }
   }, [loginData]);
-
 
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
@@ -54,24 +53,24 @@ const OtpScreen = () => {
       Toast.show({
         type: 'error',
         text1: 'Invalid OTP',
-        text2: 'Please enter a valid 6-digit OTP'
+        text2: 'Please enter a valid 6-digit OTP',
       });
       return;
     }
 
     setIsLoading(true);
-    console.log("Verify OTP Response: TEST", {
+    console.log('Verify OTP Response: TEST', {
       phone: phoneNumber,
-      otp: code
+      otp: code,
     });
     // return
     try {
       const response = await verifyOtp({
         phone: phoneNumber,
-        otp: code
+        otp: code,
       });
 
-      console.log("Verify OTP Response:", response?.data);
+      console.log('Verify OTP Response:', response?.data);
       // return
       if (response?.data) {
         // Dispatch data if your backend returns token/user here
@@ -79,27 +78,36 @@ const OtpScreen = () => {
         if (response?.data?.data?.token) {
           dispatch(setJWTToken(response?.data?.data?.token));
         }
-        if (response.data.data) { // Assuming user object might be in data.data or similar
-          dispatch(setUserData({ ...response.data.data, phoneNumber: phoneNumber }));
+        if (response.data.data) {
+          // Assuming user object might be in data.data or similar
+          dispatch(
+            setUserData({
+              ...response.data?.data?.user,
+              phoneNumber: phoneNumber,
+              isReregister: response.data.data?.isRegistered ? true : false,
+            }),
+          );
         }
-
         Toast.show({
           type: 'success',
           text1: 'Verification Successful',
-          text2: 'Welcome to DigniRide!'
+          text2: 'Welcome to DigniRide!',
         });
 
-        console.log("22222 JWTToken  phoneNumber", phoneNumber);
+        console.log('22222 JWTToken  phoneNumber', phoneNumber);
 
-        navigation.navigate('Register', { phoneNumber });
-        // navigation.replace('Main', { screen: 'HomeTab' });
+        if (response.data.data?.isRegistered) {
+          navigation.navigate('Main', { screen: 'HomeTab' });
+        } else {
+          navigation.navigate('Register', { phoneNumber });
+        }
       }
     } catch (error: any) {
-      console.error("Verify OTP Error:", error);
+      console.error('Verify OTP Error:', error);
       Toast.show({
         type: 'error',
         text1: 'Verification Failed',
-        text2: error.message || 'Invalid OTP'
+        text2: error.message || 'Invalid OTP',
       });
     } finally {
       setIsLoading(false);
@@ -145,7 +153,7 @@ const OtpScreen = () => {
             />
 
             <Button
-              title={isLoading ? "Verifying..." : "Verify & Continue"}
+              title={isLoading ? 'Verifying...' : 'Verify & Continue'}
               onPress={handleVerify}
               disabled={isLoading}
               style={{ marginBottom: perfectSize(24) }}

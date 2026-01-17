@@ -1,24 +1,42 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { perfectSize, scaleAndClampFontSize } from '../../utils/dimensions';
 import { colors } from '../../utils/colors';
 import Button from '../../components/common/Button';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+  logoutRequest,
+  logoutSuccess,
+  logoutFailure,
+} from '@store/actions/authActions';
+import { persistor } from '@store/index';
+import { CommonActions, useNavigation } from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
+import { logoutApi } from '@services/authServices/authServices';
 
 const ProfileScreen = () => {
-  // Mock Data
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
+  const userData = useSelector((state: any) => state.authReducer.userData);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  console.log('userData', userData);
+
   const userProfile = {
-    name: 'gfdgdf',
-    city: 'geg',
-    phone: '+1 234 567 8900',
-    address: 'geg',
-    vehicle: 'gdg',
+    name: userData?.name,
+    city: userData?.city,
+    phone: userData?.phone || userData?.vehicleNumber,
+    address: userData?.city,
+    vehicle: userData?.vehicleNumber,
     stats: {
       created: 0,
       joined: 0,
@@ -26,9 +44,101 @@ const ProfileScreen = () => {
     },
   };
 
-  const handleLogout = () => {
-    // Handle logout logic
-    console.log('Logging out...');
+  const handleLogout = async () => {
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            setIsLoggingOut(true);
+            dispatch(logoutRequest());
+
+            // Call logout API
+            const response = await logoutApi();
+
+            console.log('Logout Response:', response?.data);
+
+            if (response?.data?.success) {
+              // Dispatch logout success
+              dispatch(logoutSuccess());
+
+              // Clear redux persist
+              await persistor.purge();
+
+              // Show success message
+              Toast.show({
+                type: 'success',
+                text1: 'Logged Out',
+                text2:
+                  response?.data?.data?.message ||
+                  'You have been logged out successfully',
+              });
+
+              // Navigate to Login screen with replace
+              // Since ProfileScreen is inside TabNavigator which is inside Main,
+              // we need to get the parent (root) navigator
+              const parentNavigation = navigation.getParent();
+              if (parentNavigation) {
+                parentNavigation.dispatch(
+                  CommonActions.reset({
+                    index: 0,
+                    routes: [{ name: 'Login' }],
+                  }),
+                );
+              } else {
+                // Fallback
+                navigation.dispatch(
+                  CommonActions.reset({
+                    index: 0,
+                    routes: [{ name: 'Login' }],
+                  }),
+                );
+              }
+            } else {
+              throw new Error('Logout failed');
+            }
+          } catch (error: any) {
+            console.error('Logout Error:', error);
+
+            dispatch(logoutFailure(error?.message || 'Logout failed'));
+
+            // Even on error, clear local data and navigate to login
+            await persistor.purge();
+            dispatch(logoutSuccess());
+
+            Toast.show({
+              type: 'error',
+              text1: 'Logout Error',
+              text2: 'You have been logged out locally',
+            });
+
+            const parentNavigation = navigation.getParent();
+            if (parentNavigation) {
+              parentNavigation.dispatch(
+                CommonActions.reset({
+                  index: 0,
+                  routes: [{ name: 'Login' }],
+                }),
+              );
+            } else {
+              navigation.dispatch(
+                CommonActions.reset({
+                  index: 0,
+                  routes: [{ name: 'Login' }],
+                }),
+              );
+            }
+          } finally {
+            setIsLoggingOut(false);
+          }
+        },
+      },
+    ]);
   };
 
   return (
@@ -88,13 +198,13 @@ const ProfileScreen = () => {
         </View>
 
         {/* Logout Button */}
-        {/* Logout Button */}
         <Button
-          title="Logout"
+          title={isLoggingOut ? 'Logging out...' : 'Logout'}
           onPress={handleLogout}
           variant="danger"
           icon="↪️"
           style={{ marginTop: perfectSize(16) }}
+          disabled={isLoggingOut}
         />
       </ScrollView>
     </SafeAreaView>
