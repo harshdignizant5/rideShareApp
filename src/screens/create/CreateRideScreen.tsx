@@ -12,6 +12,9 @@ import {
   Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../navigation/types';
 import { perfectSize, scaleAndClampFontSize } from '../../utils/dimensions';
 import { colors } from '../../utils/colors';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -36,6 +39,7 @@ interface LocationResult {
 }
 
 const CreateRideScreen = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [startLocation, setStartLocation] = useState('');
   const [destination, setDestination] = useState('');
   const [date, setDate] = useState(new Date());
@@ -202,8 +206,7 @@ const CreateRideScreen = () => {
         setDate(new Date());
         setIsDateSelected(false);
 
-        // Optionally navigate to Ride Details or Home
-        // navigation.navigate('HomeTab');
+        navigation.navigate('Main', { screen: 'MyRidesTab', params: { tab: 'created' } });
       }
     } catch (error: any) {
       console.error("Create Ride Error:", error);

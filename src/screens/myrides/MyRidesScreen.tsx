@@ -14,17 +14,34 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { perfectSize, scaleAndClampFontSize } from '../../utils/dimensions';
 import { colors } from '../../utils/colors';
 import RideCard, { RideData } from '../../components/RideCard';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import { useCallback } from 'react';
 
 const MyRidesScreen = () => {
+  const navigation = useNavigation();
+  const route = useRoute<any>();
   const [activeTab, setActiveTab] = useState<'created' | 'joined'>('created');
   const [createdRides, setCreatedRides] = useState<RideData[]>([]);
   const [loading, setLoading] = useState(false);
 
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useFocusEffect(
+    useCallback(() => {
+      if (activeTab === 'created') {
+        fetchCreatedRides();
+      }
+    }, [activeTab])
+  );
+
   useEffect(() => {
-    if (activeTab === 'created') {
-      fetchCreatedRides();
+    if (route.params?.tab) {
+      setActiveTab(route.params.tab);
+      navigation.setParams({ tab: undefined });
     }
-  }, [activeTab]);
+  }, [route.params]);
+  /* eslint-enable react-hooks/exhaustive-deps */
+
+
 
   const fetchCreatedRides = async () => {
     setLoading(true);
@@ -48,6 +65,8 @@ const MyRidesScreen = () => {
           requests: ride._count?.requests || 0,
           ...ride
         }));
+        // Sort by createdAt desc (newest first)
+        mappedRides.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         setCreatedRides(mappedRides);
       }
     } catch (error: any) {

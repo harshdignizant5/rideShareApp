@@ -25,12 +25,16 @@ export const createRide = async (data: any) => {
     return callApiPost({ url: ENDPOINTS.CREATE_RIDE, data });
 };
 
-export const getRides = async () => {
-    return callApiGet({ url: ENDPOINTS.GET_RIDES });
+export const getRides = async (params?: any) => {
+    return callApiGet({ url: ENDPOINTS.GET_RIDES, params });
 };
 
 export const getCreatedRides = async () => {
     return callApiGet({ url: ENDPOINTS.GET_CREATED_RIDES });
+};
+
+export const requestRide = async (rideId: string, data: any) => {
+    return callApiPost({ url: `/rides/${rideId}/request`, data });
 };
 
 export const verifyUser = async (data: any) => {

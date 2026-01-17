@@ -63,9 +63,11 @@ const RideCard: React.FC<RideCardProps> = ({
           </View>
         </View>
 
-        {showRequestsBadge && item.requests ? (
+        {showRequestsBadge && typeof item.requests === 'number' ? (
           <View style={styles.requestBadge}>
-            <Text style={styles.requestText}>{item.requests} request</Text>
+            <Text style={styles.requestText}>
+              {item.requests} request{item.requests !== 1 ? 's' : ''}
+            </Text>
           </View>
         ) : (
           <View style={styles.chevronContainer}>

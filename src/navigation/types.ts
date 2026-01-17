@@ -3,7 +3,7 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 export type TabParamList = {
   HomeTab: undefined;
   CreateTab: undefined;
-  MyRidesTab: undefined;
+  MyRidesTab: { tab?: string };
   ProfileTab: undefined;
 };
 

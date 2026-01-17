@@ -13,31 +13,85 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/types';
 import { perfectSize, scaleAndClampFontSize } from '../../utils/dimensions';
 import { colors } from '../../utils/colors';
+import { useSelector } from 'react-redux';
+import { requestRide } from '@services/authServices/authServices';
+import Toast from 'react-native-toast-message';
 
 const RideDetailsScreen = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'RideDetails'>>();
   const { rideId } = route.params;
+  console.log("rideId:::", rideId);
 
+  // Fetch ride details from Redux store using rideId
+  const rides = useSelector((state: any) => state.homeReducer.rides);
+  const updatedRide = rides.find((ride: any) => ride.id === rideId);
   const [message, setMessage] = useState('');
 
-  // Mock data based on ID (In a real app, fetch this)
+  // If ride not found (e.g. direct link or refresh), handle gracefully (loading or error state)
+  // For now we assume typical navigation flow
+  if (!updatedRide) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Text style={styles.backButtonIcon}>←</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text>Ride not found</Text>
+        </View>
+      </SafeAreaView>
+    )
+  }
+
+  // Map API data to UI structure
   const rideData = {
-    id: rideId,
-    from: 'Downtown San Francisco',
-    to: 'SFO Airport',
-    time: 'Jan 16, 10:00 AM',
-    riderName: 'Alex Chen',
-    riderCity: 'San Francisco',
-    vehicleNumber: 'CA-1234',
-    note: 'Going to catch a flight, can pick up from downtown area',
+    id: updatedRide.id,
+    from: updatedRide.startLocation?.address,
+    to: updatedRide.endLocation?.address,
+    time: new Date(updatedRide.departureTime).toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      year: 'numeric'
+    }),
+    riderName: updatedRide.rider?.name || 'Unknown Rider',
+    riderCity: updatedRide.rider?.city || 'Unknown City',
+    vehicleNumber: updatedRide.rider?.vehicleNumber || 'No Vehicle Info',
+    note: updatedRide.note || 'No additional notes provided.',
   };
 
-  const handleRequest = () => {
-    // Handle request logic
-    console.log('Requesting to join:', rideId, 'Message:', message);
-    navigation.goBack();
+  const handleRequest = async () => {
+    if (!message.trim()) {
+      Toast.show({
+        type: 'error',
+        text1: 'Validation Error',
+        text2: 'Please add a message for the rider'
+      });
+      return;
+    }
+
+    try {
+      const response = await requestRide(rideId, { note: message });
+      if (response) {
+        Toast.show({
+          type: 'success',
+          text1: 'Request Sent',
+          text2: 'Your request to join this ride has been sent!'
+        });
+        navigation.goBack();
+      }
+    } catch (error: any) {
+      console.error("Request Ride Error:", error);
+      Toast.show({
+        type: 'error',
+        text1: 'Request Failed',
+        text2: error.message || 'Could not send request'
+      });
+    }
   };
 
   return (
