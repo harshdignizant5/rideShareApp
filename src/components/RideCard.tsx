@@ -17,9 +17,29 @@ export interface RideData {
   time: string;
   user: string;
   status: string;
+  requestStatus?: string;
   requests?: number;
   hasRequested?: boolean;
 }
+
+const getStatusColor = (status: string | undefined) => {
+  switch (status?.toUpperCase()) {
+    case 'PENDING':
+      return { bg: '#FFF9DB', text: '#F08C00' }; // Yellow/Orange
+    case 'ACCEPTED':
+      return { bg: colors.successBackground, text: colors.success }; // Green
+    case 'REJECTED':
+      return { bg: '#FFEBEE', text: '#C92A2A' }; // Red
+    case 'OPEN':
+      return { bg: '#E7F5FF', text: colors.primary }; // Blue
+    case 'MATCHED':
+      return { bg: '#F3F0FF', text: '#7950F2' }; // Purple
+    case 'COMPLETED':
+      return { bg: colors.backgroundInput, text: colors.textSecondary }; // Gray
+    default:
+      return { bg: colors.backgroundInput, text: colors.textSecondary }; // Default Gray
+  }
+};
 
 interface RideCardProps {
   item: RideData;
@@ -107,9 +127,25 @@ const RideCard: React.FC<RideCardProps> = ({
           <Text style={styles.metaText}>{item.user}</Text>
         </View>
 
-        <View style={styles.statusBadge}>
-          <Text style={styles.statusText}>
-            {item.requestStatus?.toLowerCase() || item.status?.toLowerCase()}
+        <View
+          style={[
+            styles.statusBadge,
+            {
+              backgroundColor: getStatusColor(
+                item.requestStatus || item.status,
+              ).bg,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.statusText,
+              {
+                color: getStatusColor(item.requestStatus || item.status).text,
+              },
+            ]}
+          >
+            {item.requestStatus || item.status}
           </Text>
         </View>
       </View>

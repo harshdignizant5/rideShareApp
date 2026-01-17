@@ -433,12 +433,12 @@ const CreateRideScreen = () => {
               >
                 {isDateSelected
                   ? date.toLocaleString([], {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
                   : 'Select date & time'}
               </Text>
               <Text style={styles.calendarIcon}>📅</Text>
@@ -529,7 +529,7 @@ const CreateRideScreen = () => {
             title={isLoading ? 'Creating Ride...' : 'Create Ride'}
             onPress={handleCreateRide}
             disabled={isLoading}
-            variant="secondary"
+            variant="primary"
             style={{ marginTop: perfectSize(16) }}
           />
         </ScrollView>

@@ -233,11 +233,7 @@ const styles = StyleSheet.create({
   backButton: {
     padding: perfectSize(8),
   },
-  backButtonIcon: {
-    // fontSize: scaleAndClampFontSize(24),
-    // fontWeight: 'bold',
-    // color: colors.textPrimary,
-  },
+
   headerTitle: {
     fontSize: scaleAndClampFontSize(18),
     fontWeight: '700',
@@ -307,10 +303,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  timeIcon: {
-    // fontSize: scaleAndClampFontSize(16),
-    // marginRight: perfectSize(8),
-  },
+
   timeText: {
     fontSize: scaleAndClampFontSize(14),
     color: colors.textSecondary,
@@ -321,11 +314,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: perfectSize(12),
   },
-  infoIcon: {
-    // fontSize: scaleAndClampFontSize(16),
-    // width: perfectSize(24),
-    // color: colors.textTertiary,
-  },
+
   infoText: {
     fontSize: scaleAndClampFontSize(16),
     color: colors.textPrimary,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/types';
 import { perfectSize, scaleAndClampFontSize } from '../../utils/dimensions';
@@ -95,11 +95,15 @@ const HomeScreen = () => {
     requestLocationPermission();
   }, []);
 
-  useEffect(() => {
-    if (userLocation) {
-      fetchRides();
-    }
-  }, [userLocation]);
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useFocusEffect(
+    useCallback(() => {
+      if (userLocation) {
+        fetchRides();
+      }
+    }, [userLocation]),
+  );
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   const requestLocationPermission = async () => {
     if (Platform.OS === 'ios') {
@@ -291,12 +295,12 @@ const HomeScreen = () => {
             <ActivityIndicator size="small" color={colors.primary} />
           )}
         </View>
-        <TouchableOpacity style={styles.filterButton}>
+        {/* <TouchableOpacity style={styles.filterButton}>
           <SlidersHorizontal
             size={scaleAndClampFontSize(20)}
             color={colors.textPrimary}
           />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {/* Search Suggestions */}
         {suggestions.length > 0 && (
