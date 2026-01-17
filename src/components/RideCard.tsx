@@ -108,7 +108,9 @@ const RideCard: React.FC<RideCardProps> = ({
         </View>
 
         <View style={styles.statusBadge}>
-          <Text style={styles.statusText}>{item.status}</Text>
+          <Text style={styles.statusText}>
+            {item.requestStatus || item.status}
+          </Text>
         </View>
       </View>
     </Container>
