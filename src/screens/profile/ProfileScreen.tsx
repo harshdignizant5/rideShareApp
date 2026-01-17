@@ -22,6 +22,7 @@ import { persistor } from '@store/index';
 import { CommonActions, useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import { logoutApi } from '@services/authServices/authServices';
+import socketEventHandler from '../../socket/socketEventHandler';
 
 const ProfileScreen = () => {
   const dispatch = useDispatch();
@@ -70,6 +71,10 @@ const ProfileScreen = () => {
               // Clear redux persist
               await persistor.purge();
 
+              // Disconnect socket
+              console.log('🔌 Disconnecting socket on logout...');
+              socketEventHandler.cleanup();
+
               // Show success message
               Toast.show({
                 type: 'success',
@@ -110,6 +115,12 @@ const ProfileScreen = () => {
             // Even on error, clear local data and navigate to login
             await persistor.purge();
             dispatch(logoutSuccess());
+
+            // Disconnect socket even on error
+            console.log(
+              '🔌 Disconnecting socket on logout (error fallback)...',
+            );
+            socketEventHandler.cleanup();
 
             Toast.show({
               type: 'error',

@@ -24,10 +24,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getRides } from '@services/authServices/authServices';
 import Toast from 'react-native-toast-message';
 import { debounce } from 'lodash';
-import { SET_RIDES, SET_USER_LOCATION } from '../../store/reducers/appReducer';
-
-
-
+import { SET_RIDES, SET_USER_LOCATION } from '@store/reducers/appReducer';
+import socketEventHandler from '../../socket/socketEventHandler';
 
 // Mock Data
 const RIDES = [
@@ -64,7 +62,9 @@ const HomeScreen = () => {
   const [search, setSearch] = useState('');
   // Use Redux state
   const rides = useSelector((state: any) => state.appReducer.rides);
-  const userLocation = useSelector((state: any) => state.appReducer.userLocation);
+  const userLocation = useSelector(
+    (state: any) => state.appReducer.userLocation,
+  );
 
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
@@ -74,9 +74,22 @@ const HomeScreen = () => {
   const JWTToken = useSelector((state: any) => state.authReducer.JWTToken);
   const userData = useSelector((state: any) => state.authReducer.userData);
 
-  console.log("1111111 loginData", loginData);
-  console.log("1111111 JWTToken", JWTToken);
-  console.log("1111111 userData", userData);
+  console.log('1111111 loginData', loginData);
+  console.log('1111111 JWTToken', JWTToken);
+  console.log('1111111 userData', userData);
+
+  // Initialize global socket event handler
+  useEffect(() => {
+    console.log('🚀 HomeScreen: Initializing global socket event handler...');
+
+    // Initialize with Redux dispatch
+    socketEventHandler.initialize(dispatch);
+
+    return () => {
+      console.log('🔌 HomeScreen: Component unmounting (keeping socket alive)');
+      // Don't cleanup here - socket stays active until logout
+    };
+  }, [dispatch]);
 
   useEffect(() => {
     requestLocationPermission();
@@ -131,7 +144,10 @@ const HomeScreen = () => {
           JSON.stringify(position, null, 2),
         );
         const { latitude, longitude } = position.coords;
-        dispatch({ type: SET_USER_LOCATION, payload: { lat: latitude, lng: longitude } });
+        dispatch({
+          type: SET_USER_LOCATION,
+          payload: { lat: latitude, lng: longitude },
+        });
       },
       error => {
         // See error code charts below.
@@ -174,7 +190,7 @@ const HomeScreen = () => {
     debounce((text: string) => {
       searchLocations(text);
     }, 500),
-    []
+    [],
   );
 
   const handleLocationSelect = async (item: any) => {
@@ -197,10 +213,10 @@ const HomeScreen = () => {
         lng: userLocation.lng,
         status: 'OPEN',
         limit: 20,
-        offset: 0
+        offset: 0,
       };
       const response = await getRides(params);
-      console.log("Fetch rides response:", response?.data);
+      console.log('Fetch rides response:', response?.data);
 
       if (response?.data?.data?.rides) {
         const mappedRides = response.data.data.rides.map((ride: any) => ({
@@ -211,22 +227,22 @@ const HomeScreen = () => {
             month: 'short',
             day: 'numeric',
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
           }),
           user: ride.rider.name,
           status: ride.status,
           hasRequested: ride.hasRequested,
-          ...ride
+          ...ride,
         }));
         // Update Redux Store
         dispatch({ type: SET_RIDES, payload: mappedRides });
       }
     } catch (error: any) {
-      console.error("Fetch Home Rides Error:", error);
+      console.error('Fetch Home Rides Error:', error);
       Toast.show({
         type: 'error',
         text1: 'Error',
-        text2: 'Could not fetch rides nearby'
+        text2: 'Could not fetch rides nearby',
       });
     } finally {
       setLoading(false);

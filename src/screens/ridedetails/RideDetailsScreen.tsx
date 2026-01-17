@@ -22,7 +22,7 @@ const RideDetailsScreen = () => {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'RideDetails'>>();
   const { rideId } = route.params;
-  console.log("rideId:::", rideId);
+  console.log('rideId:::', rideId);
 
   // Fetch ride details from Redux store using rideId
   const rides = useSelector((state: any) => state.appReducer.rides);
@@ -35,15 +35,20 @@ const RideDetailsScreen = () => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}
+          >
             <Text style={styles.backButtonIcon}>←</Text>
           </TouchableOpacity>
         </View>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
           <Text>Ride not found</Text>
         </View>
       </SafeAreaView>
-    )
+    );
   }
 
   // Map API data to UI structure
@@ -56,7 +61,7 @@ const RideDetailsScreen = () => {
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     }),
     riderName: updatedRide.rider?.name || 'Unknown Rider',
     riderCity: updatedRide.rider?.city || 'Unknown City',
@@ -70,7 +75,7 @@ const RideDetailsScreen = () => {
       Toast.show({
         type: 'error',
         text1: 'Validation Error',
-        text2: 'Please add a message for the rider'
+        text2: 'Please add a message for the rider',
       });
       return;
     }
@@ -81,16 +86,16 @@ const RideDetailsScreen = () => {
         Toast.show({
           type: 'success',
           text1: 'Request Sent',
-          text2: 'Your request to join this ride has been sent!'
+          text2: 'Your request to join this ride has been sent!',
         });
         navigation.goBack();
       }
     } catch (error: any) {
-      console.error("Request Ride Error:", error);
+      console.error('Request Ride Error:', error);
       Toast.show({
         type: 'error',
         text1: 'Request Failed',
-        text2: error.message || 'Could not send request'
+        text2: error.message || 'Could not send request',
       });
     }
   };
@@ -174,7 +179,7 @@ const RideDetailsScreen = () => {
 
         {/* Message Input Card */}
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Add a message (optional)</Text>
+          <Text style={styles.sectionTitle}>Add a message</Text>
           <TextInput
             style={styles.messageInput}
             placeholder="Let the rider know why you'd like to join..."
@@ -191,7 +196,12 @@ const RideDetailsScreen = () => {
       {/* Footer Button */}
       <View style={styles.footer}>
         <TouchableOpacity
-          style={[styles.requestButton, rideData.hasRequested && { backgroundColor: colors.textPlaceholder }]}
+          style={[
+            styles.requestButton,
+            rideData.hasRequested && {
+              backgroundColor: colors.textPlaceholder,
+            },
+          ]}
           onPress={rideData.hasRequested ? undefined : handleRequest}
           disabled={rideData.hasRequested}
         >
