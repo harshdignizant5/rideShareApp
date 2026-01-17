@@ -166,3 +166,7 @@ export const acceptRideRequest = async (requestId: string) => {
 export const rejectRideRequest = async (requestId: string) => {
   return callApiPost({ url: `/requests/${requestId}/reject` });
 };
+
+export const getUserStats = async () => {
+  return callApiGet({ url: ENDPOINTS.GET_USER_STATS });
+};

@@ -25,4 +25,5 @@ export const ENDPOINTS = {
   ALTERNATE_EMAIL_DELETE: '/auth/email/alternative-email-delete',
   LOGOUT: '/auth/logout',
   GET_JOINED_RIDES: `/rides/me/joined`,
+  GET_USER_STATS: `/users/me/stats`,
 };

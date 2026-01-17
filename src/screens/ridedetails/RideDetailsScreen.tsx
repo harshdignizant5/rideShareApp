@@ -16,6 +16,7 @@ import { colors } from '../../utils/colors';
 import { useSelector } from 'react-redux';
 import { requestRide } from '@services/authServices/authServices';
 import Toast from 'react-native-toast-message';
+import { ArrowLeft, MapPin, Flag, Clock, User, Bike } from 'lucide-react-native';
 
 const RideDetailsScreen = () => {
   const navigation =
@@ -39,7 +40,7 @@ const RideDetailsScreen = () => {
             onPress={() => navigation.goBack()}
             style={styles.backButton}
           >
-            <Text style={styles.backButtonIcon}>←</Text>
+            <ArrowLeft size={scaleAndClampFontSize(24)} color={colors.textPrimary} />
           </TouchableOpacity>
         </View>
         <View
@@ -108,7 +109,7 @@ const RideDetailsScreen = () => {
           onPress={() => navigation.goBack()}
           style={styles.backButton}
         >
-          <Text style={styles.backButtonIcon}>←</Text>
+          <ArrowLeft size={scaleAndClampFontSize(24)} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Ride Details</Text>
         <View style={{ width: perfectSize(24) }} />
@@ -123,11 +124,11 @@ const RideDetailsScreen = () => {
             {/* Timeline Visual */}
             <View style={styles.timelineContainer}>
               <View style={[styles.dot, { backgroundColor: '#D3F9D8' }]}>
-                <Text style={{ fontSize: 10 }}>📍</Text>
+                <MapPin size={10} color={colors.primary} />
               </View>
               <View style={styles.line} />
               <View style={[styles.dot, { backgroundColor: '#E7F5FF' }]}>
-                <Text style={{ fontSize: 10 }}>🏁</Text>
+                <Flag size={10} color={colors.textSecondary} />
               </View>
             </View>
 
@@ -148,7 +149,7 @@ const RideDetailsScreen = () => {
           <View style={styles.divider} />
 
           <View style={styles.timeRow}>
-            <Text style={styles.timeIcon}>🕒</Text>
+            <Clock size={scaleAndClampFontSize(16)} color={colors.textSecondary} style={{ marginRight: perfectSize(8) }} />
             <Text style={styles.timeText}>{rideData.time}</Text>
           </View>
         </View>
@@ -158,15 +159,15 @@ const RideDetailsScreen = () => {
           <Text style={styles.sectionTitle}>Rider Information</Text>
 
           <View style={styles.infoRow}>
-            <Text style={styles.infoIcon}>👤</Text>
+            <User size={scaleAndClampFontSize(16)} color={colors.textTertiary} style={{ marginRight: perfectSize(8) }} />
             <Text style={styles.infoText}>{rideData.riderName}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoIcon}>📍</Text>
+            <MapPin size={scaleAndClampFontSize(16)} color={colors.textTertiary} style={{ marginRight: perfectSize(8) }} />
             <Text style={styles.infoText}>{rideData.riderCity}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoIcon}>🚲</Text>
+            <Bike size={scaleAndClampFontSize(16)} color={colors.textTertiary} style={{ marginRight: perfectSize(8) }} />
             <Text style={styles.infoText}>{rideData.vehicleNumber}</Text>
           </View>
         </View>
@@ -233,9 +234,9 @@ const styles = StyleSheet.create({
     padding: perfectSize(8),
   },
   backButtonIcon: {
-    fontSize: scaleAndClampFontSize(24),
-    fontWeight: 'bold',
-    color: colors.textPrimary,
+    // fontSize: scaleAndClampFontSize(24),
+    // fontWeight: 'bold',
+    // color: colors.textPrimary,
   },
   headerTitle: {
     fontSize: scaleAndClampFontSize(18),
@@ -307,8 +308,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   timeIcon: {
-    fontSize: scaleAndClampFontSize(16),
-    marginRight: perfectSize(8),
+    // fontSize: scaleAndClampFontSize(16),
+    // marginRight: perfectSize(8),
   },
   timeText: {
     fontSize: scaleAndClampFontSize(14),
@@ -321,9 +322,9 @@ const styles = StyleSheet.create({
     marginBottom: perfectSize(12),
   },
   infoIcon: {
-    fontSize: scaleAndClampFontSize(16),
-    width: perfectSize(24),
-    color: colors.textTertiary,
+    // fontSize: scaleAndClampFontSize(16),
+    // width: perfectSize(24),
+    // color: colors.textTertiary,
   },
   infoText: {
     fontSize: scaleAndClampFontSize(16),

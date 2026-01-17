@@ -21,16 +21,37 @@ import {
 import { persistor } from '@store/index';
 import { CommonActions, useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
-import { logoutApi } from '@services/authServices/authServices';
+import { logoutApi, getUserStats } from '@services/authServices/authServices';
 import socketEventHandler from '../../socket/socketEventHandler';
+import { useFocusEffect } from '@react-navigation/native';
+import { User, Phone, MapPin, Bike, LogOut } from 'lucide-react-native';
 
 const ProfileScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const userData = useSelector((state: any) => state.authReducer.userData);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [userStats, setUserStats] = useState({
+    ridesCreated: 0,
+    ridesJoined: 0,
+  });
 
-  console.log('userData', userData);
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchStats();
+    }, [])
+  );
+
+  const fetchStats = async () => {
+    try {
+      const response = await getUserStats();
+      if (response?.data?.success) {
+        setUserStats(response.data.data);
+      }
+    } catch (error) {
+      console.error("Fetch Stats Error:", error);
+    }
+  };
 
   const userProfile = {
     name: userData?.name,
@@ -38,11 +59,6 @@ const ProfileScreen = () => {
     phone: userData?.phone || userData?.vehicleNumber,
     address: userData?.city,
     vehicle: userData?.vehicleNumber,
-    stats: {
-      created: 0,
-      joined: 0,
-      completed: 0,
-    },
   };
 
   const handleLogout = async () => {
@@ -162,7 +178,7 @@ const ProfileScreen = () => {
         {/* Profile Header Card */}
         <View style={styles.profileCard}>
           <View style={styles.avatarContainer}>
-            <Text style={styles.avatarIcon}>👤</Text>
+            <User size={scaleAndClampFontSize(40)} color={colors.primary} />
           </View>
           <Text style={styles.userName}>{userProfile.name}</Text>
           <Text style={styles.userCity}>{userProfile.city}</Text>
@@ -173,37 +189,32 @@ const ProfileScreen = () => {
           <Text style={styles.sectionTitle}>Contact Information</Text>
 
           <View style={styles.infoRow}>
-            <Text style={styles.infoIcon}>📞</Text>
+            <Phone size={scaleAndClampFontSize(18)} color={colors.textTertiary} style={{ marginRight: perfectSize(16) }} />
             <Text style={styles.infoText}>{userProfile.phone}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoIcon}>📍</Text>
+            <MapPin size={scaleAndClampFontSize(18)} color={colors.textTertiary} style={{ marginRight: perfectSize(16) }} />
             <Text style={styles.infoText}>{userProfile.address}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoIcon}>🚲</Text>
+            <Bike size={scaleAndClampFontSize(18)} color={colors.textTertiary} style={{ marginRight: perfectSize(16) }} />
             <Text style={styles.infoText}>{userProfile.vehicle}</Text>
           </View>
         </View>
 
+        {/* Ride Statistics Card */}
         {/* Ride Statistics Card */}
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Ride Statistics</Text>
 
           <View style={styles.statsContainer}>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{userProfile.stats.created}</Text>
+              <Text style={styles.statValue}>{userStats.ridesCreated}</Text>
               <Text style={styles.statLabel}>Created</Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{userProfile.stats.joined}</Text>
+              <Text style={styles.statValue}>{userStats.ridesJoined}</Text>
               <Text style={styles.statLabel}>Joined</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>
-                {userProfile.stats.completed}
-              </Text>
-              <Text style={styles.statLabel}>Completed</Text>
             </View>
           </View>
         </View>
@@ -213,7 +224,7 @@ const ProfileScreen = () => {
           title={isLoggingOut ? 'Logging out...' : 'Logout'}
           onPress={handleLogout}
           variant="danger"
-          icon="↪️"
+          icon={<LogOut size={20} color={colors.textWhite} />}
           style={{ marginTop: perfectSize(16) }}
           disabled={isLoggingOut}
         />
@@ -262,8 +273,8 @@ const styles = StyleSheet.create({
     marginBottom: perfectSize(16),
   },
   avatarIcon: {
-    fontSize: scaleAndClampFontSize(40),
-    color: colors.primary,
+    // fontSize: scaleAndClampFontSize(40),
+    // color: colors.primary,
   },
   userName: {
     fontSize: scaleAndClampFontSize(20),
@@ -294,10 +305,10 @@ const styles = StyleSheet.create({
     marginBottom: perfectSize(16),
   },
   infoIcon: {
-    fontSize: scaleAndClampFontSize(18),
-    marginRight: perfectSize(16),
-    width: perfectSize(24),
-    textAlign: 'center',
+    // fontSize: scaleAndClampFontSize(18),
+    // marginRight: perfectSize(16),
+    // width: perfectSize(24),
+    // textAlign: 'center',
   },
   infoText: {
     fontSize: scaleAndClampFontSize(16),
