@@ -1,97 +1,226 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Digni Ride Documentation
 
-# Getting Started
+## 1. Problem Statement
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+In urban areas, a large number of motorcycles commute daily with **empty seats**, while many people travel alone on **similar routes at the same time**.
 
-## Step 1: Start Metro
+This results in:
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+- Inefficient use of existing vehicles
+- Increased traffic congestion
+- Higher fuel consumption
+- Limited affordable and fast commute options for short distances
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+Despite the presence of ride-sharing platforms, there is **no simple solution focused on motorcycle-based ride sharing**, which is often the fastest mode of transport in dense cities.
 
-```sh
-# Using npm
-npm start
+---
 
-# OR using Yarn
+## 2. Core Idea
+
+Digni Ride is a motorcycle ride-sharing application that allows users to:
+
+- **Create a ride** when they are already traveling on a bike
+- **Join a nearby ride** as a passenger if their route matches
+
+There are **no predefined user roles**.
+
+A user automatically becomes a rider when creating a ride and a passenger when joining one.
+
+The experience is designed to be **simple, fast, and flexible**.
+
+---
+
+## 3. Problem It Solves
+
+- Underutilisation of motorcycle capacity
+- Lack of short-distance, low-cost ride options
+- Urban traffic and fuel inefficiency
+- Time wasted in finding quick local transport
+- Improves vehicle utilisation
+- Reduces travel cost
+- Helps lower traffic congestion
+- Encourages eco-friendly commuting
+
+---
+
+## 4. How We Approached the Idea
+
+Our approach was guided by **simplicity and feasibility within a hackathon timeframe**.
+
+Key decisions:
+
+- Focused on **motorcycles only** (one empty seat)
+- Built around **location-based matching**
+- Designed a **clear ride lifecycle**:
+  - Open → Matched → Completed
+- Prioritised essential flows over advanced features
+
+We followed an **iterative MVP-first mindset**, ensuring the core experience worked end-to-end before adding enhancements.
+
+---
+
+## 5. User Flow
+
+![User Flow Diagram](diagram-export-new.png)
+
+> _Note: Diagram image reference updated to standard markdown. Please ensure `diagram-export-new.png` is in the repository._
+
+---
+
+## 6. AI Tools Used to Build the MVP
+
+We leveraged AI tools to speed up development and improve quality:
+
+- **Google AI Studio**
+  - Project structure and features understanding
+  - Application flow and requirements
+- **Github Copilot Agents (Bmad method)**
+  - Backend architecture planning
+  - API design and validations
+  - Prisma + PostgreSQL schema design
+  - PostGIS-based geospatial query logic
+- **AI Design Tools**
+  - Figma AI for mobile application screens
+  - Landing page structure and copywriting with ChatGPT and Antigravity
+- **Eraser AI**
+  - User flow diagram using single prompt
+- **AI-Assisted Debugging**
+  - Fixing authentication flows
+  - Improving query performance
+  - Refining user experience and edge cases
+
+AI allowed us to **focus more on product thinking and system design** rather than boilerplate coding.
+
+---
+
+## 7. Challenges Faced During Implementation
+
+- **Geospatial filtering**
+
+  Implementing accurate distance-based ride matching required integrating PostGIS with Prisma and handling raw SQL queries.
+
+- **JWT logout handling**
+
+  Immediate token invalidation was challenging due to JWT’s stateless nature, requiring a blacklist-based approach.
+
+- **State management complexity**
+
+  Ensuring correct transitions between ride states (Open → Matched → Completed) without edge-case failures.
+
+---
+
+## 8. Future Scope
+
+Digni Ride is designed to be **scalable beyond the MVP**. Future enhancements include:
+
+### 🔐 User KYC
+
+- Government ID verification
+- License validation for riders
+- Increased trust and safety
+
+### 💰 Revenue Model
+
+- Platform commission per ride
+- Subscription plans for frequent riders
+- Sponsored rides or ads
+
+### ⭐ Reputation System
+
+- Aggregated user ratings
+- Trust score for riders and passengers
+- Abuse reporting mechanism
+
+### 💬 Communication
+
+- In-app chat between rider and passenger
+- Emergency contact and SOS features
+
+---
+
+## 9. 🛠️ Installation & Running
+
+Follow these steps to set up and run the Digni Ride mobile application locally.
+
+### Prerequisites
+
+- **Node.js** (v18 or newer recommended)
+- **Yarn** package manager
+- **React Native CLI** development environment setup:
+  - [Android Setup](https://reactnative.dev/docs/environment-setup?guide=native&platform=android) (Java SDK, Android Studio)
+  - [iOS Setup](https://reactnative.dev/docs/environment-setup?guide=native&platform=ios) (Mac only: Xcode, CocoaPods)
+
+### 1. Clone & Install Dependencies
+
+Clone the repository and install the NPM packages:
+
+```bash
+# Clone the repo (if you haven't already)
+git clone https://github.com/harshdignizant5/rideShareApp.git
+cd rideShareApp
+
+# Install dependencies
+yarn install
+```
+
+### 2. iOS Specific Setup (Mac Only)
+
+If you are developing for iOS, you need to install the native pods:
+
+```bash
+cd ios
+pod install
+cd ..
+```
+
+### 3. Environment Configuration
+
+Create a `.env` file in the root directory to configure the application. You can refer to the example below:
+
+**`.env`**:
+
+```env
+API_URL=https://digni-ride-backend-production.up.railway.app/api/v1
+```
+
+### 4. Running the App
+
+First, start the Metro bundler:
+
+```bash
 yarn start
 ```
 
-## Step 2: Build and run your app
+Then, in a separate terminal, launch the app on your desired platform:
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+**For Android:**
 
-### Android
-
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
+```bash
 yarn android
 ```
 
-### iOS
+**For iOS:**
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
+```bash
 yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+---
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## 10. Team Members
 
-## Step 3: Modify your app
+- Keval kikani - Mobile Application Developer
+- Harsh Chitaliya - Mobile Application Developer
+- Raj Parmar - Backend Developer
+- Harish Taskar - Backend Developer
+- Parth Patel - QA
 
-Now that you have successfully run the app, let's make changes!
+## 11. Source Code
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+- Mobile Application: [https://github.com/harshdignizant5/rideShareApp.git](https://github.com/harshdignizant5/rideShareApp.git)
+- Application Backend: [https://github.com/harishtaskar/digni-ride-backend](https://github.com/harishtaskar/digni-ride-backend)
+- Application Landing Page: [https://github.com/harishtaskar/digni-ride-landing](https://github.com/harishtaskar/digni-ride-landing)
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+## 12. Test Cases
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+- [Google Sheets Test Cases](https://docs.google.com/spreadsheets/d/1ZWynPJywTjvwZAnJeaujzEh7RSdE0d91g0OpNMyPJ0w/edit?gid=591602876#gid=591602876)
