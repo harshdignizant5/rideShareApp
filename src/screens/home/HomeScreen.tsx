@@ -9,6 +9,7 @@ import {
   Platform,
   PermissionsAndroid,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -19,6 +20,9 @@ import { colors } from '../../utils/colors';
 import RideCard from '../../components/RideCard';
 import { Search, SlidersHorizontal } from 'lucide-react-native';
 import Geolocation from 'react-native-geolocation-service';
+import { useSelector } from 'react-redux';
+import { getRides } from '@services/authServices/authServices';
+import Toast from 'react-native-toast-message';
 
 // Mock Data
 const RIDES = [
@@ -52,6 +56,14 @@ const HomeScreen = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [search, setSearch] = useState('');
+
+  const loginData = useSelector((state: any) => state.authReducer.loginData);
+  const JWTToken = useSelector((state: any) => state.authReducer.JWTToken);
+  const userData = useSelector((state: any) => state.authReducer.userData);
+
+  console.log("1111111 loginData", loginData);
+  console.log("1111111 JWTToken", JWTToken);
+  console.log("1111111 userData", userData);
 
   useEffect(() => {
     requestLocationPermission();
@@ -107,7 +119,7 @@ const HomeScreen = () => {
     );
   };
 
-  const renderRideItem = ({ item }: { item: (typeof RIDES)[0] }) => (
+  const renderRideItem = ({ item }: { item: any }) => (
     <RideCard
       item={item}
       onPress={() => navigation.navigate('RideDetails', { rideId: item.id })}
@@ -204,6 +216,21 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: perfectSize(24),
     paddingBottom: perfectSize(24),
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: perfectSize(50),
+  },
+  emptyText: {
+    color: colors.textSecondary,
+    fontSize: scaleAndClampFontSize(16),
   },
 });
 

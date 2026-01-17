@@ -7,16 +7,35 @@ import RegisterScreen from '../screens/auth/RegisterScreen';
 import TabNavigator from './TabNavigator';
 import RideDetailsScreen from '../screens/ridedetails/RideDetailsScreen';
 
+import { useSelector } from 'react-redux';
+import { RootState } from '@store/index';
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const AppNavigator = () => {
+  const { JWTToken, userData } = useSelector((state: RootState) => state.authReducer);
+
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="Otp" component={OtpScreen} />
-      <Stack.Screen name="Register" component={RegisterScreen} />
-      <Stack.Screen name="Main" component={TabNavigator} />
-      <Stack.Screen name="RideDetails" component={RideDetailsScreen} />
+      {!JWTToken ? (
+        <>
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Otp" component={OtpScreen} />
+        </>
+      ) : (
+        !userData?.isReregister ? (
+          <Stack.Screen
+            name="Register"
+            component={RegisterScreen}
+            initialParams={{ phoneNumber: userData?.phone || '' }}
+          />
+        ) : (
+          <>
+            <Stack.Screen name="Main" component={TabNavigator} />
+            <Stack.Screen name="RideDetails" component={RideDetailsScreen} />
+          </>
+        )
+      )}
     </Stack.Navigator>
   );
 };

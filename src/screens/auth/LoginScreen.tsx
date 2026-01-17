@@ -7,7 +7,13 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  Alert,
 } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginSuccess, setJWTToken, setLoginData, setUserData } from '@store/actions/authActions';
+import { authLogin } from '@services/authServices/authServices';
+import { RootState } from '@store/index';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -19,11 +25,51 @@ import Button from '../../components/common/Button';
 const LoginScreen = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const dispatch = useDispatch();
 
-  const handleContinue = () => {
-    // Basic validation or logic here
-    navigation.navigate('Otp', { phoneNumber });
+  const loginData = useSelector((state: RootState) => state.authReducer.loginData);
+  const [isLoading, setIsLoading] = useState(false);
+
+  console.log("loginData 111", loginData);
+
+  const [phoneNumber, setPhoneNumber] = useState('7434023679');
+  const [name, setName] = useState('');
+  const [city, setCity] = useState('');
+
+  // const loginData = useSelector((state: any) => state.authReducer.loginData);
+  const JWTToken = useSelector((state: any) => state.authReducer.JWTToken);
+  const userData = useSelector((state: any) => state.authReducer.userData);
+
+  console.log("1111111 loginData", loginData);
+  console.log("1111111 JWTToken", JWTToken);
+  console.log("1111111 userData", userData);
+
+  const handleContinue = async () => {
+    // navigation.navigate('Otp', { phoneNumber });
+
+    setIsLoading(true);
+    try {
+      const response = await authLogin({
+        phone: phoneNumber,
+        name: name,
+        city: city
+      });
+      console.log("responseresponse", response);
+
+      if (response?.data) {
+        // Dispatch to reducer
+        dispatch(setLoginData(response?.data?.data));
+
+        navigation.navigate('Otp', { phoneNumber });
+
+      }
+    } catch (error: any) {
+      console.log("responseresponse error", error);
+
+      Alert.alert("Error", error.message || "Login failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -32,7 +78,7 @@ const LoginScreen = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
-        <View style={styles.content}>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.logoContainer}>
             <View style={styles.logoCircle}>
               <Text style={styles.logoIcon}>🚲</Text>
@@ -47,16 +93,38 @@ const LoginScreen = () => {
             <Text style={styles.label}>Phone Number</Text>
             <TextInput
               style={styles.input}
-              placeholder="+1 234 567 8900"
+              placeholder="+91 9825144252"
               placeholderTextColor={colors.textPlaceholder}
               keyboardType="phone-pad"
               value={phoneNumber}
               onChangeText={setPhoneNumber}
             />
 
-            <Button title="Continue" onPress={handleContinue} />
+            {/* <Text style={styles.label}>Name</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="John Doe"
+              placeholderTextColor={colors.textPlaceholder}
+              value={name}
+              onChangeText={setName}
+            />
+
+            <Text style={styles.label}>City</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Bangalore"
+              placeholderTextColor={colors.textPlaceholder}
+              value={city}
+              onChangeText={setCity}
+            /> */}
+
+            <Button
+              title={isLoading ? "Loading..." : "Continue"}
+              onPress={handleContinue}
+              disabled={isLoading || phoneNumber.length !== 10}
+            />
           </View>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -71,7 +139,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    flex: 1,
+    paddingHorizontal: perfectSize(24),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: perfectSize(24),
     justifyContent: 'center',
     alignItems: 'center',

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -15,6 +15,12 @@ import { RootStackParamList } from '../../navigation/types';
 import { perfectSize, scaleAndClampFontSize } from '../../utils/dimensions';
 import { colors } from '../../utils/colors';
 import Button from '../../components/common/Button';
+import { RootState } from '@store/reducer';
+import { useSelector, useDispatch } from 'react-redux';
+import Toast from 'react-native-toast-message';
+import { verifyOtp } from '@services/authServices/authServices';
+import { setJWTToken, setUserData } from '@store/actions/authActions';
+import { Alert } from 'react-native';
 
 const OtpScreen = () => {
   const navigation =
@@ -23,9 +29,81 @@ const OtpScreen = () => {
   const [code, setCode] = useState('');
   const { phoneNumber } = route.params;
 
-  const handleVerify = () => {
-    // Basic validation or logic here
-    navigation.navigate('Register', { phoneNumber });
+  const loginData = useSelector((state: any) => state.authReducer.loginData);
+  console.log("loginData", loginData);
+
+  useEffect(() => {
+    if (loginData?.otp) {
+      Toast.show({
+        type: 'success',
+        text1: 'OTP Sent',
+        text2: `Your OTP is ${loginData.otp}`,
+        visibilityTime: 6000,
+      });
+      // Pre-fill for convenience if desired, or just show toast
+      // setCode(String(loginData.otp)); 
+    }
+  }, [loginData]);
+
+
+  const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleVerify = async () => {
+    if (!code || code.length < 6) {
+      Toast.show({
+        type: 'error',
+        text1: 'Invalid OTP',
+        text2: 'Please enter a valid 6-digit OTP'
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    console.log("Verify OTP Response: TEST", {
+      phone: phoneNumber,
+      otp: code
+    });
+    // return
+    try {
+      const response = await verifyOtp({
+        phone: phoneNumber,
+        otp: code
+      });
+
+      console.log("Verify OTP Response:", response?.data);
+      // return
+      if (response?.data) {
+        // Dispatch data if your backend returns token/user here
+        // Based on standard flows:
+        if (response?.data?.data?.token) {
+          dispatch(setJWTToken(response?.data?.data?.token));
+        }
+        if (response.data.data) { // Assuming user object might be in data.data or similar
+          dispatch(setUserData({ ...response.data.data, phoneNumber: phoneNumber }));
+        }
+
+        Toast.show({
+          type: 'success',
+          text1: 'Verification Successful',
+          text2: 'Welcome to DigniRide!'
+        });
+
+        console.log("22222 JWTToken  phoneNumber", phoneNumber);
+
+        navigation.navigate('Register', { phoneNumber });
+        // navigation.replace('Main', { screen: 'HomeTab' });
+      }
+    } catch (error: any) {
+      console.error("Verify OTP Error:", error);
+      Toast.show({
+        type: 'error',
+        text1: 'Verification Failed',
+        text2: error.message || 'Invalid OTP'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChangeNumber = () => {
@@ -67,8 +145,9 @@ const OtpScreen = () => {
             />
 
             <Button
-              title="Verify & Continue"
+              title={isLoading ? "Verifying..." : "Verify & Continue"}
               onPress={handleVerify}
+              disabled={isLoading}
               style={{ marginBottom: perfectSize(24) }}
             />
 

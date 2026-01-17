@@ -10,7 +10,6 @@ import {
   KeyboardAvoidingView,
   ActivityIndicator,
   Modal,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { perfectSize, scaleAndClampFontSize } from '../../utils/dimensions';
@@ -18,6 +17,8 @@ import { colors } from '../../utils/colors';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Button from '../../components/common/Button';
 import { debounce } from 'lodash';
+import { createRide } from '@services/authServices/authServices';
+import Toast from 'react-native-toast-message';
 
 interface LocationResult {
   place_id: number;
@@ -42,6 +43,7 @@ const CreateRideScreen = () => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [isDateSelected, setIsDateSelected] = useState(false);
   const [note, setNote] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   // Location Search State
   const [startSuggestions, setStartSuggestions] = useState<LocationResult[]>(
@@ -53,6 +55,10 @@ const CreateRideScreen = () => {
   const [activeSearch, setActiveSearch] = useState<'start' | 'dest' | null>(
     null,
   );
+
+  // Selected Location Objects
+  const [selectedStart, setSelectedStart] = useState<LocationResult | null>(null);
+  const [selectedDest, setSelectedDest] = useState<LocationResult | null>(null);
 
   // Function to fetch locations from Nominatim
   const searchLocations = async (query: string, type: 'start' | 'dest') => {
@@ -98,46 +104,117 @@ const CreateRideScreen = () => {
     [],
   );
 
-  const handleCreateRide = () => {
+  const handleCreateRide = async () => {
     // Validation
     if (!startLocation.trim()) {
-      Alert.alert('Validation Error', 'Please enter a start location');
+      Toast.show({
+        type: 'error',
+        text1: 'Validation Error',
+        text2: 'Please enter a start location'
+      });
       return;
     }
 
     if (!destination.trim()) {
-      Alert.alert('Validation Error', 'Please enter a destination');
+      Toast.show({
+        type: 'error',
+        text1: 'Validation Error',
+        text2: 'Please enter a destination'
+      });
+      return;
+    }
+
+    // Ensure start location coordinates are available
+    if (!selectedStart || !selectedStart.lat || !selectedStart.lon) {
+      Toast.show({
+        type: 'error',
+        text1: 'Validation Error',
+        text2: 'Please select a start location from the suggestions to get coordinates.'
+      });
+      return;
+    }
+
+    // Ensure destination coordinates are available
+    if (!selectedDest || !selectedDest.lat || !selectedDest.lon) {
+      Toast.show({
+        type: 'error',
+        text1: 'Validation Error',
+        text2: 'Please select a destination from the suggestions to get accurate coordinates.'
+      });
       return;
     }
 
     if (!isDateSelected) {
-      Alert.alert(
-        'Validation Error',
-        'Please select a departure date and time',
-      );
+      Toast.show({
+        type: 'error',
+        text1: 'Validation Error',
+        text2: 'Please select a departure date and time'
+      });
       return;
     }
 
     // Check if selected date/time is in the past
     const now = new Date();
     if (date <= now) {
-      Alert.alert(
-        'Invalid Date/Time',
-        'Please select a future date and time for your ride',
-      );
+      Toast.show({
+        type: 'error',
+        text1: 'Invalid Date/Time',
+        text2: 'Please select a future date and time for your ride'
+      });
       return;
     }
 
-    // All validations passed
-    console.log('Creating ride:', {
-      startLocation,
-      destination,
+    // Final Payload Construction with Safety Checks
+    const payload = {
+      startLocation: {
+        lat: parseFloat(selectedStart.lat),
+        lng: parseFloat(selectedStart.lon),
+        address: startLocation
+      },
+      endLocation: {
+        lat: parseFloat(selectedDest.lat),
+        lng: parseFloat(selectedDest.lon),
+        address: destination
+      },
       departureTime: date.toISOString(),
-      note,
-    });
+      note: note || "" // Ensure note is at least an empty string
+    };
 
-    Alert.alert('Success', 'Ride created successfully!');
-    // Add create ride logic here
+    console.log('Creating ride payload:', payload);
+    setIsLoading(true);
+
+    try {
+      const response = await createRide(payload);
+      console.log("Create Ride Response:", response?.data);
+
+      if (response) {
+        Toast.show({
+          type: 'success',
+          text1: 'Ride Created',
+          text2: 'Your ride has been successfully published!'
+        });
+        // Reset form or navigate
+        setStartLocation('');
+        setDestination('');
+        setSelectedStart(null);
+        setSelectedDest(null);
+        setNote('');
+        setDate(new Date());
+        setIsDateSelected(false);
+
+        // Optionally navigate to Ride Details or Home
+        // navigation.navigate('HomeTab');
+      }
+    } catch (error: any) {
+      console.error("Create Ride Error:", error);
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to Create Ride',
+        text2: error.message || 'Something went wrong.'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleLocationSelect = (
@@ -148,9 +225,11 @@ const CreateRideScreen = () => {
 
     if (type === 'start') {
       setStartLocation(item.display_name);
+      setSelectedStart(item);
       setStartSuggestions([]);
     } else {
       setDestination(item.display_name);
+      setSelectedDest(item);
       setDestSuggestions([]);
     }
     setActiveSearch(null);
@@ -184,7 +263,11 @@ const CreateRideScreen = () => {
       // Validate that the combined date/time is not in the past
       const now = new Date();
       if (updatedDate <= now) {
-        Alert.alert('Invalid Time', 'Please select a future date and time');
+        Toast.show({
+          type: 'error',
+          text1: 'Invalid Time',
+          text2: 'Please select a future date and time'
+        });
         return;
       }
 
@@ -237,6 +320,7 @@ const CreateRideScreen = () => {
                 onFocus={() => setActiveSearch('start')}
                 onChangeText={text => {
                   setStartLocation(text);
+                  setSelectedStart(null);
                   debouncedSearch(text, 'start');
                 }}
               />
@@ -282,6 +366,7 @@ const CreateRideScreen = () => {
                 onFocus={() => setActiveSearch('dest')}
                 onChangeText={text => {
                   setDestination(text);
+                  setSelectedDest(null);
                   debouncedSearch(text, 'dest');
                 }}
               />
@@ -325,12 +410,12 @@ const CreateRideScreen = () => {
               >
                 {isDateSelected
                   ? date.toLocaleString([], {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
                   : 'Select date & time'}
               </Text>
               <Text style={styles.calendarIcon}>📅</Text>
@@ -418,8 +503,9 @@ const CreateRideScreen = () => {
 
           {/* Create Button */}
           <Button
-            title="Create Ride"
+            title={isLoading ? "Creating Ride..." : "Create Ride"}
             onPress={handleCreateRide}
+            disabled={isLoading}
             variant="secondary"
             style={{ marginTop: perfectSize(16) }}
           />

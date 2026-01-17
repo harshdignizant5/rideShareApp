@@ -1,0 +1,26 @@
+export const ENDPOINTS = {
+    REGISTER: `/auth/register`,
+    UPDATE_USER: `/users/me`,
+    CREATE_RIDE: `/rides`,
+    GET_RIDES: `/rides`,  // Same base URL for GET request
+    GET_CREATED_RIDES: `/rides/me/created`,
+    VERIFY_OTP: `/auth/verify-otp`, // Updated to match cURL request if needed, user cURL was /auth/verify-otp but logic also had /auth/email/verify-otp. Setting to cURL one as prio or just having both.
+    // cURL: http://localhost:3000/api/v1/auth/verify-otp -> /auth/verify-otp
+    RESEND_OTP: `/auth/email/resend-otp`,
+    MFA_EMAIL: `/auth/mfa/email`,
+    LOGIN: `/auth/login`,
+    RESET_PASSWORD: `/auth/reset_password`,
+    USERNAME_SUGGEST: `/auth/username/suggest`,
+    SEND_QR_CODE: `/auth/mfa/qr/send-code`,
+    VERIFY_QR_CODE: `/auth/mfa/qr/verify-code`,
+    VERIFY_EMAIL_AT_LOGIN: `/auth/login/verify-code`,
+    RESET_MFA: "/auth/reset-mfa",
+    DATA_VALIDATE: "/auth/signup/validate",
+    SET_PASSWORD: "/auth/set_password",
+    REFRESH_TOKEN: "/auth/refresh-token",
+    LOG_OUT: "/auth/logout",
+    ADD_ALTERNATE_EMAIL: "/auth/email/alternative-email",
+    VERIFY_LOGIN: "/auth/verify-login",
+    ALTERNATE_EMAIL_RESEND: "/auth/email/alternative-email-resend",
+    ALTERNATE_EMAIL_DELETE: "/auth/email/alternative-email-delete",
+};
