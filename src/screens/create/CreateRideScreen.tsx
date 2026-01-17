@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   ActivityIndicator,
   Modal,
+  FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -22,6 +23,7 @@ import Button from '../../components/common/Button';
 import { debounce } from 'lodash';
 import { createRide } from '@services/authServices/authServices';
 import Toast from 'react-native-toast-message';
+import { useSelector } from 'react-redux';
 
 interface LocationResult {
   place_id: number;
@@ -50,6 +52,11 @@ const CreateRideScreen = () => {
   const [note, setNote] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // Saved Addresses
+  const savedAddresses = useSelector(
+    (state: any) => state.appReducer.savedAddresses || [],
+  );
+
   // Location Search State
   const [startSuggestions, setStartSuggestions] = useState<LocationResult[]>(
     [],
@@ -67,7 +74,7 @@ const CreateRideScreen = () => {
   );
   const [selectedDest, setSelectedDest] = useState<LocationResult | null>(null);
 
-  // Function to fetch locations from Nominatim
+  // Function to fetch locations from Photon
   const searchLocations = async (query: string, type: 'start' | 'dest') => {
     if (!query || query.length < 3) {
       if (type === 'start') setStartSuggestions([]);
@@ -80,20 +87,26 @@ const CreateRideScreen = () => {
 
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
-          query,
-        )}&format=json&addressdetails=1&limit=5&countrycodes=in`,
-        {
-          headers: {
-            'User-Agent': 'BikeSharingApp', // Required by Nominatim
-          },
-        },
+        `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5`,
       );
 
       const data = await response.json();
+      const mappedData = data.features.map((feature: any) => ({
+        place_id: feature.properties.osm_id,
+        lat: feature.geometry.coordinates[1].toString(),
+        lon: feature.geometry.coordinates[0].toString(),
+        display_name:
+          feature.properties.name +
+          ', ' +
+          (feature.properties.city ||
+            feature.properties.state ||
+            feature.properties.country ||
+            ''),
+        address: feature.properties,
+      }));
 
-      if (type === 'start') setStartSuggestions(data);
-      else setDestSuggestions(data);
+      if (type === 'start') setStartSuggestions(mappedData);
+      else setDestSuggestions(mappedData);
     } catch (error) {
       console.error('Error fetching locations:', error);
     } finally {
@@ -258,6 +271,43 @@ const CreateRideScreen = () => {
     setActiveSearch(null);
   };
 
+  // Handle saved address selection chips
+  const handleSavedAddressSelect = (addr: any, type: 'start' | 'dest') => {
+    // Construct display name from address components
+    const addressParts = [
+      addr.address.street,
+      addr.address.city,
+      addr.address.province,
+      addr.address.country,
+    ]
+      .filter(part => part && part.trim() !== '')
+      .join(', ');
+
+    const locationItem: LocationResult = {
+      place_id:
+        parseInt(addr.id.replace(/-/g, '').substring(0, 10), 16) || Date.now(), // Generate a number ID from UUID or fallback
+      licence: '',
+      osm_type: 'node',
+      osm_id: 0,
+      boundingbox: [],
+      lat: addr.address.latitude.toString(),
+      lon: addr.address.longitude.toString(),
+      display_name: addressParts,
+      class: 'place',
+      type: 'address',
+      importance: 1,
+      address: addr.address, // Pass the inner address object
+    };
+
+    if (type === 'start') {
+      setStartLocation(addr.title); // Or addr.address depending on preference
+      setSelectedStart(locationItem);
+    } else {
+      setDestination(addr.title);
+      setSelectedDest(locationItem);
+    }
+  };
+
   const onDateChange = (event: any, selectedDate?: Date) => {
     const currentDate = selectedDate || date;
     setShowDatePicker(Platform.OS === 'ios');
@@ -305,6 +355,30 @@ const CreateRideScreen = () => {
       // iOS can show both at once, so we'll just use datetime mode
       setShowTimePicker(false);
     }
+  };
+
+  const renderSavedAddressChips = (type: 'start' | 'dest') => {
+    if (savedAddresses.length === 0) return null;
+
+    return (
+      <View style={styles.addressChipsContainer}>
+        <FlatList
+          horizontal
+          data={savedAddresses}
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={item => item.id}
+          contentContainerStyle={{ gap: perfectSize(8) }}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.addressChip}
+              onPress={() => handleSavedAddressSelect(item, type)}
+            >
+              <Text style={styles.addressChipText}>{item.title}</Text>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
+    );
   };
 
   return (
@@ -370,6 +444,8 @@ const CreateRideScreen = () => {
                 ))}
               </View>
             )}
+            {/* Saved Address Chips for Start Location */}
+            {renderSavedAddressChips('start')}
           </View>
 
           {/* Destination */}
@@ -416,6 +492,8 @@ const CreateRideScreen = () => {
                 ))}
               </View>
             )}
+            {/* Saved Address Chips for Destination */}
+            {renderSavedAddressChips('dest')}
           </View>
 
           {/* Departure Time */}
@@ -433,12 +511,12 @@ const CreateRideScreen = () => {
               >
                 {isDateSelected
                   ? date.toLocaleString([], {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })
                   : 'Select date & time'}
               </Text>
               <Text style={styles.calendarIcon}>📅</Text>
@@ -557,6 +635,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: perfectSize(24),
+    paddingBottom: perfectSize(40),
   },
   instructions: {
     fontSize: scaleAndClampFontSize(16),
@@ -655,6 +734,22 @@ const styles = StyleSheet.create({
   },
   doneButton: {
     fontWeight: '600',
+  },
+  addressChipsContainer: {
+    marginTop: perfectSize(8),
+  },
+  addressChip: {
+    paddingVertical: perfectSize(6),
+    paddingHorizontal: perfectSize(12),
+    backgroundColor: colors.backgroundLight,
+    borderRadius: perfectSize(20),
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  addressChipText: {
+    fontSize: scaleAndClampFontSize(12),
+    color: colors.textSecondary,
+    fontWeight: '500',
   },
 });
 

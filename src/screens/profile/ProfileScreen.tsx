@@ -20,16 +20,25 @@ import {
 } from '@store/actions/authActions';
 import { persistor } from '@store/index';
 import { CommonActions, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../navigation/types';
 import Toast from 'react-native-toast-message';
-import { logoutApi, getUserStats } from '@services/authServices/authServices';
+import {
+  logoutApi,
+  getUserStats,
+  getAddresses,
+} from '@services/authServices/authServices';
 import socketEventHandler from '../../socket/socketEventHandler';
 import { useFocusEffect } from '@react-navigation/native';
 import { User, Phone, MapPin, Bike, LogOut } from 'lucide-react-native';
 
 const ProfileScreen = () => {
   const dispatch = useDispatch();
-  const navigation = useNavigation();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const userData = useSelector((state: any) => state.authReducer.userData);
+  const savedAddresses =
+    useSelector((state: any) => state.appReducer.savedAddresses) || [];
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [userStats, setUserStats] = useState({
     ridesCreated: 0,
@@ -39,7 +48,7 @@ const ProfileScreen = () => {
   useFocusEffect(
     React.useCallback(() => {
       fetchStats();
-    }, [])
+    }, []),
   );
 
   const fetchStats = async () => {
@@ -49,9 +58,29 @@ const ProfileScreen = () => {
         setUserStats(response.data.data);
       }
     } catch (error) {
-      console.error("Fetch Stats Error:", error);
+      console.error('Fetch Stats Error:', error);
     }
   };
+
+  const fetchAddresses = async () => {
+    try {
+      const response = await getAddresses();
+      if (response?.data?.success) {
+        dispatch({
+          type: 'SET_SAVED_ADDRESSES',
+          payload: response.data.data,
+        });
+      }
+    } catch (error) {
+      console.error('Fetch Addresses Error:', error);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchAddresses();
+    }, []),
+  );
 
   const userProfile = {
     name: userData?.name,
@@ -189,15 +218,27 @@ const ProfileScreen = () => {
           <Text style={styles.sectionTitle}>Contact Information</Text>
 
           <View style={styles.infoRow}>
-            <Phone size={scaleAndClampFontSize(18)} color={colors.textTertiary} style={{ marginRight: perfectSize(16) }} />
+            <Phone
+              size={scaleAndClampFontSize(18)}
+              color={colors.textTertiary}
+              style={{ marginRight: perfectSize(16) }}
+            />
             <Text style={styles.infoText}>{userProfile.phone}</Text>
           </View>
           <View style={styles.infoRow}>
-            <MapPin size={scaleAndClampFontSize(18)} color={colors.textTertiary} style={{ marginRight: perfectSize(16) }} />
+            <MapPin
+              size={scaleAndClampFontSize(18)}
+              color={colors.textTertiary}
+              style={{ marginRight: perfectSize(16) }}
+            />
             <Text style={styles.infoText}>{userProfile.address}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Bike size={scaleAndClampFontSize(18)} color={colors.textTertiary} style={{ marginRight: perfectSize(16) }} />
+            <Bike
+              size={scaleAndClampFontSize(18)}
+              color={colors.textTertiary}
+              style={{ marginRight: perfectSize(16) }}
+            />
             <Text style={styles.infoText}>{userProfile.vehicle}</Text>
           </View>
         </View>
@@ -219,12 +260,48 @@ const ProfileScreen = () => {
           </View>
         </View>
 
+        {/* Saved Addresses Card */}
+        <View style={styles.card}>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionTitle}>Saved Addresses</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('AddAddress')}>
+              <Text style={styles.addAddressText}>+ Add</Text>
+            </TouchableOpacity>
+          </View>
+
+          {savedAddresses.length > 0 ? (
+            savedAddresses.map((addr: any) => (
+              <View key={addr.id} style={styles.addressItem}>
+                <View style={styles.addressIconContainer}>
+                  <MapPin
+                    size={scaleAndClampFontSize(16)}
+                    color={colors.primary}
+                  />
+                </View>
+                <View style={styles.addressContent}>
+                  <Text style={styles.addressTitle}>{addr.title}</Text>
+                  <Text style={styles.addressText} numberOfLines={1}>
+                    {[
+                      addr.address?.street,
+                      addr.address?.city,
+                      addr.address?.country,
+                    ]
+                      .filter(Boolean)
+                      .join(', ')}
+                  </Text>
+                </View>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.noAddressText}>No saved addresses yet.</Text>
+          )}
+        </View>
+
         {/* Logout Button */}
         <Button
           title={isLoggingOut ? 'Logging out...' : 'Logout'}
           onPress={handleLogout}
           variant="danger"
-          icon={<LogOut size={20} color={colors.textWhite} />}
           style={{ marginTop: perfectSize(16) }}
           disabled={isLoggingOut}
         />
@@ -330,8 +407,48 @@ const styles = StyleSheet.create({
     marginBottom: perfectSize(4),
   },
   statLabel: {
-    fontSize: scaleAndClampFontSize(12),
     color: colors.textTertiary,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: perfectSize(16),
+  },
+  addAddressText: {
+    fontSize: scaleAndClampFontSize(14),
+    fontWeight: '600',
+    color: colors.primary,
+  },
+  addressItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: perfectSize(12),
+    backgroundColor: colors.backgroundInput, // Optional light bg
+    padding: perfectSize(12),
+    borderRadius: perfectSize(8),
+  },
+  addressIconContainer: {
+    marginRight: perfectSize(12),
+  },
+  addressContent: {
+    flex: 1,
+  },
+  addressTitle: {
+    fontSize: scaleAndClampFontSize(14),
+    fontWeight: '600',
+    color: colors.textPrimary,
+    marginBottom: perfectSize(2),
+  },
+  addressText: {
+    fontSize: scaleAndClampFontSize(12),
+    color: colors.textSecondary,
+  },
+  noAddressText: {
+    color: colors.textTertiary,
+    fontStyle: 'italic',
+    fontSize: scaleAndClampFontSize(14),
+    marginTop: -perfectSize(8), // pull up a bit since header has margin
   },
 });
 

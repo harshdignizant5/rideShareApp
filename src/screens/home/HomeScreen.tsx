@@ -66,9 +66,17 @@ const HomeScreen = () => {
     (state: any) => state.appReducer.userLocation,
   );
 
+  const savedAddresses = useSelector(
+    (state: any) => state.appReducer.savedAddresses || [],
+  );
+
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isLocationFromSearch, setIsLocationFromSearch] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
+    null,
+  );
 
   const loginData = useSelector((state: any) => state.authReducer.loginData);
   const JWTToken = useSelector((state: any) => state.authReducer.JWTToken);
@@ -99,9 +107,9 @@ const HomeScreen = () => {
   useFocusEffect(
     useCallback(() => {
       if (userLocation) {
-        fetchRides();
+        fetchRides(isLocationFromSearch);
       }
-    }, [userLocation]),
+    }, [userLocation, isLocationFromSearch]),
   );
   /* eslint-enable react-hooks/exhaustive-deps */
 
@@ -152,6 +160,7 @@ const HomeScreen = () => {
           type: SET_USER_LOCATION,
           payload: { lat: latitude, lng: longitude },
         });
+        setIsLocationFromSearch(false);
       },
       error => {
         // See error code charts below.
@@ -173,18 +182,23 @@ const HomeScreen = () => {
     setIsSearching(true);
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
-          query,
-        )}&format=json&addressdetails=1&limit=5&countrycodes=in`,
-        {
-          headers: {
-            'User-Agent': 'BikeSharingApp/1.0',
-            Accept: 'application/json',
-          },
-        },
+        `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5`,
       );
       const data = await response.json();
-      setSuggestions(data);
+      const mappedData = data.features.map((feature: any) => ({
+        place_id: feature.properties.osm_id,
+        lat: feature.geometry.coordinates[1].toString(),
+        lon: feature.geometry.coordinates[0].toString(),
+        display_name:
+          feature.properties.name +
+          ', ' +
+          (feature.properties.city ||
+            feature.properties.state ||
+            feature.properties.country ||
+            ''),
+        address: feature.properties,
+      }));
+      setSuggestions(mappedData);
     } catch (error) {
       console.log('Error fetching locations:error', error);
 
@@ -205,14 +219,36 @@ const HomeScreen = () => {
   const handleLocationSelect = async (item: any) => {
     setSearch(item.display_name);
     setSuggestions([]);
+    setSelectedAddressId(null); // Clear selected chip if manual search
     const lat = parseFloat(item.lat);
     const lng = parseFloat(item.lon);
 
     // Update location and fetch rides nearby selected location
+    setIsLocationFromSearch(true);
     dispatch({ type: SET_USER_LOCATION, payload: { lat, lng } });
   };
 
-  const fetchRides = async () => {
+  const handleSavedAddressSelect = (addr: any) => {
+    if (selectedAddressId === addr.id) {
+      // Deselect
+      setSelectedAddressId(null);
+      setSearch('');
+      getCurrentLocation(); // Go back to current location
+      return;
+    }
+
+    setSearch(addr.title);
+    setSelectedAddressId(addr.id);
+    // Correctly accessing latitude and longitude from the address object
+    const lat = addr.address.latitude;
+    const lng = addr.address.longitude;
+
+    // Update location and fetch rides nearby selected location
+    setIsLocationFromSearch(true);
+    dispatch({ type: SET_USER_LOCATION, payload: { lat, lng } });
+  };
+
+  const fetchRides = async (fromSearch = false) => {
     if (!userLocation) return;
 
     setLoading(true);
@@ -223,7 +259,11 @@ const HomeScreen = () => {
         status: 'OPEN',
         limit: 20,
         offset: 0,
+        isSearching: fromSearch, // Check if location is from search
       };
+      console.log('Fetch rides params:', params);
+
+      // return;
       const response = await getRides(params);
       console.log('Fetch rides response:', response?.data);
 
@@ -295,13 +335,6 @@ const HomeScreen = () => {
             <ActivityIndicator size="small" color={colors.primary} />
           )}
         </View>
-        {/* <TouchableOpacity style={styles.filterButton}>
-          <SlidersHorizontal
-            size={scaleAndClampFontSize(20)}
-            color={colors.textPrimary}
-          />
-        </TouchableOpacity> */}
-
         {/* Search Suggestions */}
         {suggestions.length > 0 && (
           <View style={styles.suggestionsContainer}>
@@ -320,6 +353,38 @@ const HomeScreen = () => {
         )}
       </View>
 
+      {/* Address Slider */}
+      {savedAddresses.length > 0 && (
+        <View style={styles.addressSliderContainer}>
+          <FlatList
+            horizontal
+            data={savedAddresses}
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={item => item.id}
+            contentContainerStyle={styles.addressSliderContent}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[
+                  styles.addressChip,
+                  selectedAddressId === item.id && styles.addressChipSelected,
+                ]}
+                onPress={() => handleSavedAddressSelect(item)}
+              >
+                <Text
+                  style={[
+                    styles.addressChipText,
+                    selectedAddressId === item.id &&
+                      styles.addressChipTextSelected,
+                  ]}
+                >
+                  {item.title}
+                </Text>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
+      )}
+
       {loading ? (
         <View style={styles.loaderContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
@@ -332,7 +397,7 @@ const HomeScreen = () => {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           refreshing={loading}
-          onRefresh={fetchRides}
+          onRefresh={() => fetchRides(isLocationFromSearch)}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>No rides available nearby</Text>
@@ -435,6 +500,33 @@ const styles = StyleSheet.create({
   suggestionText: {
     fontSize: scaleAndClampFontSize(14),
     color: colors.textPrimary,
+  },
+  addressSliderContainer: {
+    marginBottom: perfectSize(16),
+  },
+  addressSliderContent: {
+    paddingHorizontal: perfectSize(24),
+    gap: perfectSize(12),
+  },
+  addressChip: {
+    paddingVertical: perfectSize(8),
+    paddingHorizontal: perfectSize(16),
+    backgroundColor: colors.backgroundLight,
+    borderRadius: perfectSize(20),
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  addressChipSelected: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  addressChipText: {
+    fontSize: scaleAndClampFontSize(14),
+    color: colors.textPrimary,
+    fontWeight: '500',
+  },
+  addressChipTextSelected: {
+    color: colors.textWhite,
   },
 });
 

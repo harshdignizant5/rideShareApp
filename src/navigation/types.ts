@@ -13,5 +13,6 @@ export type RootStackParamList = {
   Register: { phoneNumber: string };
   Main: NavigatorScreenParams<TabParamList>;
   RideDetails: { rideId: string };
-  MyRideDetails: { ride: any };
+  MyRideDetails: { ride: any; showRequestsBadge?: boolean }; // Adding showRequestsBadge here as well since I saw it used in MyRideDetailsScreen updates
+  AddAddress: undefined;
 };

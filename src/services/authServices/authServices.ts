@@ -170,3 +170,11 @@ export const rejectRideRequest = async (requestId: string) => {
 export const getUserStats = async () => {
   return callApiGet({ url: ENDPOINTS.GET_USER_STATS });
 };
+
+export const getAddresses = async () => {
+  return callApiGet({ url: ENDPOINTS.GET_ADDRESSES });
+};
+
+export const addAddress = async (data: any) => {
+  return callApiPost({ url: ENDPOINTS.ADD_ADDRESS, data });
+};

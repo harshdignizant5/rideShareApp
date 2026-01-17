@@ -26,4 +26,6 @@ export const ENDPOINTS = {
   LOGOUT: '/auth/logout',
   GET_JOINED_RIDES: `/rides/me/joined`,
   GET_USER_STATS: `/users/me/stats`,
+  GET_ADDRESSES: `/addresses`,
+  ADD_ADDRESS: `/addresses`,
 };

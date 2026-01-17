@@ -39,7 +39,7 @@ const OtpScreen = () => {
         type: 'success',
         text1: 'OTP Sent',
         text2: `Your OTP is ${loginData.otp}`,
-        visibilityTime: 6000,
+        visibilityTime: 20000,
       });
       // Pre-fill for convenience if desired, or just show toast
       // setCode(String(loginData.otp));
