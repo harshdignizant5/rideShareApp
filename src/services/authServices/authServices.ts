@@ -44,7 +44,11 @@ export const requestRide = async (rideId: string, data: any) => {
 };
 
 export const deleteRide = async (rideId: string) => {
-    return callApiDelete({ url: `/rides/${rideId}` });
+  return callApiDelete({ url: `/rides/${rideId}` });
+};
+
+export const getRideRequests = async (rideId: string) => {
+  return callApiGet({ url: `/rides/${rideId}/requests` });
 };
 
 export const verifyUser = async (data: any) => {
@@ -153,4 +157,12 @@ export const logoutApi = () => {
 
 export const getJoinedRides = async () => {
   return callApiGet({ url: ENDPOINTS.GET_JOINED_RIDES });
+};
+
+export const acceptRideRequest = async (requestId: string) => {
+  return callApiPost({ url: `/requests/${requestId}/accept` });
+};
+
+export const rejectRideRequest = async (requestId: string) => {
+  return callApiPost({ url: `/requests/${requestId}/reject` });
 };

@@ -326,7 +326,7 @@ const HomeScreen = () => {
           onRefresh={fetchRides}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No rides available nearby</Text>
+              <Text style={styles.emptyText}>No rides available nearby 2 KM</Text>
             </View>
           }
         />

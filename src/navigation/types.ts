@@ -12,5 +12,6 @@ export type RootStackParamList = {
   Otp: { phoneNumber: string };
   Register: { phoneNumber: string };
   Main: NavigatorScreenParams<TabParamList>;
-  RideDetails: { rideId: string }; // Adding this for future use based on images
+  RideDetails: { rideId: string };
+  MyRideDetails: { ride: any };
 };

@@ -16,6 +16,8 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../navigation/types';
 
 import {
   getCreatedRides,
@@ -29,7 +31,7 @@ import RideCard, { RideData } from '../../components/RideCard';
 
 
 const MyRidesScreen = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const route = useRoute<any>();
   const dispatch = useDispatch();
@@ -179,6 +181,7 @@ const MyRidesScreen = () => {
       item={item}
       showRequestsBadge={activeTab === 'created'}
       onDelete={activeTab === 'created' ? () => handleDeleteRide(item.id) : undefined}
+      onPress={() => navigation.navigate('MyRideDetails', { ride: item })}
     />
   );
   /* eslint-enable react/no-unstable-nested-components */

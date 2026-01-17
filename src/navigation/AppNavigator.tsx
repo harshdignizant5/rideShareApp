@@ -6,6 +6,7 @@ import OtpScreen from '../screens/auth/OtpScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import TabNavigator from './TabNavigator';
 import RideDetailsScreen from '../screens/ridedetails/RideDetailsScreen';
+import MyRideDetailsScreen from '../screens/myrides/MyRideDetailsScreen';
 
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/index';
@@ -33,6 +34,7 @@ const AppNavigator = () => {
           <>
             <Stack.Screen name="Main" component={TabNavigator} />
             <Stack.Screen name="RideDetails" component={RideDetailsScreen} />
+            <Stack.Screen name="MyRideDetails" component={MyRideDetailsScreen} />
           </>
         )
       )}
