@@ -62,6 +62,7 @@ const RideDetailsScreen = () => {
     riderCity: updatedRide.rider?.city || 'Unknown City',
     vehicleNumber: updatedRide.rider?.vehicleNumber || 'No Vehicle Info',
     note: updatedRide.note || 'No additional notes provided.',
+    hasRequested: updatedRide.hasRequested,
   };
 
   const handleRequest = async () => {
@@ -189,8 +190,14 @@ const RideDetailsScreen = () => {
 
       {/* Footer Button */}
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.requestButton} onPress={handleRequest}>
-          <Text style={styles.requestButtonText}>Request to Join</Text>
+        <TouchableOpacity
+          style={[styles.requestButton, rideData.hasRequested && { backgroundColor: colors.textPlaceholder }]}
+          onPress={rideData.hasRequested ? undefined : handleRequest}
+          disabled={rideData.hasRequested}
+        >
+          <Text style={styles.requestButtonText}>
+            {rideData.hasRequested ? 'Request Sent' : 'Request to Join'}
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

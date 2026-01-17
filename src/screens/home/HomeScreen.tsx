@@ -212,6 +212,7 @@ const HomeScreen = () => {
           }),
           user: ride.rider.name,
           status: ride.status,
+          hasRequested: ride.hasRequested,
           ...ride
         }));
         // Update Redux Store

@@ -18,6 +18,7 @@ export interface RideData {
   user: string;
   status: string;
   requests?: number;
+  hasRequested?: boolean;
 }
 
 interface RideCardProps {
@@ -68,6 +69,10 @@ const RideCard: React.FC<RideCardProps> = ({
             <Text style={styles.requestText}>
               {item.requests} request{item.requests !== 1 ? 's' : ''}
             </Text>
+          </View>
+        ) : item.hasRequested ? (
+          <View style={styles.requestedBadge}>
+            <Text style={styles.requestedText}>Requested</Text>
           </View>
         ) : (
           <View style={styles.chevronContainer}>
@@ -182,6 +187,17 @@ const styles = StyleSheet.create({
     fontSize: scaleAndClampFontSize(13),
     color: colors.textTertiary,
     fontWeight: '500',
+  },
+  requestedBadge: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: perfectSize(8),
+    paddingVertical: perfectSize(4),
+    borderRadius: perfectSize(8),
+  },
+  requestedText: {
+    fontSize: scaleAndClampFontSize(12),
+    fontWeight: '700',
+    color: colors.textWhite,
   },
   statusBadge: {
     backgroundColor: colors.successBackground,
