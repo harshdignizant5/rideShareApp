@@ -7,14 +7,21 @@ import {
   FlatList,
   ActivityIndicator,
 } from 'react-native';
-import { getCreatedRides } from '@services/authServices/authServices';
+import {
+  getCreatedRides,
+  getJoinedRides,
+} from '@services/authServices/authServices';
 import Toast from 'react-native-toast-message';
 import { useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { perfectSize, scaleAndClampFontSize } from '../../utils/dimensions';
 import { colors } from '../../utils/colors';
 import RideCard, { RideData } from '../../components/RideCard';
-import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import { useCallback } from 'react';
 
 const MyRidesScreen = () => {
@@ -22,6 +29,7 @@ const MyRidesScreen = () => {
   const route = useRoute<any>();
   const [activeTab, setActiveTab] = useState<'created' | 'joined'>('created');
   const [createdRides, setCreatedRides] = useState<RideData[]>([]);
+  const [joinedRides, setJoinedRides] = useState<RideData[]>([]);
   const [loading, setLoading] = useState(false);
 
   /* eslint-disable react-hooks/exhaustive-deps */
@@ -29,8 +37,10 @@ const MyRidesScreen = () => {
     useCallback(() => {
       if (activeTab === 'created') {
         fetchCreatedRides();
+      } else if (activeTab === 'joined') {
+        fetchJoinedRides();
       }
-    }, [activeTab])
+    }, [activeTab]),
   );
 
   useEffect(() => {
@@ -41,13 +51,11 @@ const MyRidesScreen = () => {
   }, [route.params]);
   /* eslint-enable react-hooks/exhaustive-deps */
 
-
-
   const fetchCreatedRides = async () => {
     setLoading(true);
     try {
       const response = await getCreatedRides();
-      console.log("getCreatedRides response", response.data.data);
+      console.log('getCreatedRides response', response.data.data);
 
       if (Array.isArray(response?.data?.data)) {
         const mappedRides = response.data.data.map((ride: any) => ({
@@ -58,47 +66,72 @@ const MyRidesScreen = () => {
             month: 'short',
             day: 'numeric',
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
           }),
           user: ride.rider.name,
           status: ride.status,
           requests: ride._count?.requests || 0,
-          ...ride
+          ...ride,
         }));
         // Sort by createdAt desc (newest first)
-        mappedRides.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        mappedRides.sort(
+          (a: any, b: any) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        );
         setCreatedRides(mappedRides);
       }
     } catch (error: any) {
-      console.error("Fetch My Created Rides Error:", error);
+      console.error('Fetch My Created Rides Error:', error);
       Toast.show({
         type: 'error',
         text1: 'Error',
-        text2: 'Could not fetch your created rides'
+        text2: 'Could not fetch your created rides',
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const JOINED_RIDES = [
-    {
-      id: '2',
-      from: 'csdcs',
-      to: 'xascas',
-      time: '2026-01-22T01:31',
-      user: 'fere',
-      status: 'Pending',
-    },
-    {
-      id: '3',
-      from: 'csdcs',
-      to: 'xascas',
-      time: '2026-01-22T01:31',
-      user: 'fere',
-      status: 'Pending',
-    },
-  ];
+  const fetchJoinedRides = async () => {
+    setLoading(true);
+    try {
+      const response = await getJoinedRides();
+      console.log('getJoinedRides response', response.data.data);
+
+      if (Array.isArray(response?.data?.data)) {
+        const mappedRides = response.data.data.map((ride: any) => ({
+          id: ride.id,
+          from: ride.startLocation.address,
+          to: ride.endLocation.address,
+          time: new Date(ride.departureTime).toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          user: ride.rider.name,
+          status: ride.status,
+          requests: ride.requestCount || 0,
+          ...ride,
+        }));
+        // Sort by createdAt desc (newest first)
+        mappedRides.sort(
+          (a: any, b: any) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        );
+        setJoinedRides(mappedRides);
+      }
+    } catch (error: any) {
+      console.error('Fetch My Joined Rides Error:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Could not fetch your joined rides',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   /* eslint-disable react/no-unstable-nested-components */
   const renderItem = ({ item }: { item: RideData }) => (
@@ -149,12 +182,14 @@ const MyRidesScreen = () => {
         </View>
       ) : (
         <FlatList
-          data={activeTab === 'created' ? createdRides : JOINED_RIDES}
+          data={activeTab === 'created' ? createdRides : joinedRides}
           renderItem={renderItem}
           keyExtractor={item => item.id}
           contentContainerStyle={styles.listContent}
           refreshing={loading}
-          onRefresh={activeTab === 'created' ? fetchCreatedRides : undefined}
+          onRefresh={
+            activeTab === 'created' ? fetchCreatedRides : fetchJoinedRides
+          }
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>No rides found</Text>

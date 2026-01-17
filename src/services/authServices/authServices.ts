@@ -146,3 +146,7 @@ export const logoutApi = () => {
     data: {},
   });
 };
+
+export const getJoinedRides = async () => {
+  return callApiGet({ url: ENDPOINTS.GET_JOINED_RIDES });
+};
