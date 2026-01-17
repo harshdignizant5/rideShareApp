@@ -33,6 +33,7 @@ import {
   MessageCircle,
   Activity,
   Inbox,
+  Phone,
 } from 'lucide-react-native';
 
 const MyRideDetailsScreen = () => {
@@ -248,92 +249,123 @@ const MyRideDetailsScreen = () => {
         </View>
 
         {/* Requests Section */}
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Requests ({requests.length})</Text>
-          {loadingRequests ? (
-            <ActivityIndicator color={colors.primary} />
-          ) : requests.length > 0 ? (
-            requests.map((request: any) => (
-              <View key={request.id} style={styles.requestItem}>
-                <View style={styles.requesterHeader}>
-                  <View style={styles.requesterInfo}>
-                    <View style={styles.avatarPlaceholder}>
-                      <User
-                        size={scaleAndClampFontSize(16)}
-                        color={colors.textPrimary}
-                      />
-                    </View>
-                    <View>
-                      <Text style={styles.requesterName}>
-                        {request.passenger?.name || 'Unknown'}
-                      </Text>
-                      <Text style={styles.requesterCity}>
-                        {request.passenger?.city || 'Unknown City'}
-                      </Text>
+        {showRequestsBadge ? (
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>
+              Requests ({requests.length})
+            </Text>
+            {loadingRequests ? (
+              <ActivityIndicator color={colors.primary} />
+            ) : requests.length > 0 ? (
+              requests.map((request: any) => (
+                <View key={request.id} style={styles.requestItem}>
+                  <View style={styles.requesterHeader}>
+                    <View style={styles.requesterInfo}>
+                      <View style={styles.avatarPlaceholder}>
+                        <User
+                          size={scaleAndClampFontSize(16)}
+                          color={colors.textPrimary}
+                        />
+                      </View>
+                      <View>
+                        <Text style={styles.requesterName}>
+                          {request.passenger?.name || 'Unknown'}
+                        </Text>
+                        <Text style={styles.requesterCity}>
+                          {request.passenger?.city || 'Unknown City'}
+                        </Text>
+                        {['ACCEPTED', 'MATCHED', 'CONFIRMED'].includes(
+                          request.status?.toUpperCase(),
+                        ) && (
+                          <View
+                            style={{
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                              marginTop: 4,
+                            }}
+                          >
+                            <Phone
+                              size={12}
+                              color={colors.primary}
+                              style={{ marginRight: 4 }}
+                            />
+                            <Text
+                              style={{
+                                fontSize: 12,
+                                color: colors.primary,
+                                fontWeight: '600',
+                              }}
+                            >
+                              {request.passenger?.phone ||
+                                request.passenger?.phoneNumber}
+                            </Text>
+                          </View>
+                        )}
+                      </View>
                     </View>
                   </View>
-                </View>
 
-                {request.note && (
-                  <View style={styles.noteBubble}>
+                  {request.note && (
+                    <View style={styles.noteBubble}>
+                      <View
+                        style={{ flexDirection: 'row', alignItems: 'center' }}
+                      >
+                        <MessageCircle
+                          size={14}
+                          color={colors.textPrimary}
+                          style={{ marginRight: 4 }}
+                        />
+                        <Text style={styles.noteContent}>{request.note}</Text>
+                      </View>
+                    </View>
+                  )}
+
+                  {request.status === 'PENDING' ? (
+                    <View style={styles.actionButtons}>
+                      <TouchableOpacity
+                        style={styles.acceptButton}
+                        onPress={() => handleAcceptRequest(request.id)}
+                      >
+                        <Text style={styles.acceptButtonText}>Accept</Text>
+                      </TouchableOpacity>
+                      <View style={{ width: perfectSize(12) }} />
+                      <TouchableOpacity
+                        style={styles.rejectButton}
+                        onPress={() => handleRejectRequest(request.id)}
+                      >
+                        <Text style={styles.rejectButtonText}>Reject</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
                     <View
-                      style={{ flexDirection: 'row', alignItems: 'center' }}
-                    >
-                      <MessageCircle
-                        size={14}
-                        color={colors.textPrimary}
-                        style={{ marginRight: 4 }}
-                      />
-                      <Text style={styles.noteContent}>{request.note}</Text>
-                    </View>
-                  </View>
-                )}
-
-                {request.status === 'PENDING' ? (
-                  <View style={styles.actionButtons}>
-                    <TouchableOpacity
-                      style={styles.acceptButton}
-                      onPress={() => handleAcceptRequest(request.id)}
-                    >
-                      <Text style={styles.acceptButtonText}>Accept</Text>
-                    </TouchableOpacity>
-                    <View style={{ width: perfectSize(12) }} />
-                    <TouchableOpacity
-                      style={styles.rejectButton}
-                      onPress={() => handleRejectRequest(request.id)}
-                    >
-                      <Text style={styles.rejectButtonText}>Reject</Text>
-                    </TouchableOpacity>
-                  </View>
-                ) : (
-                  <View
-                    style={[
-                      styles.statusBadge,
-                      request.status === 'ACCEPTED'
-                        ? styles.statusAccepted
-                        : styles.statusRejected,
-                    ]}
-                  >
-                    <Text
                       style={[
-                        styles.statusText,
+                        styles.statusBadge,
                         request.status === 'ACCEPTED'
-                          ? styles.statusTextAccepted
-                          : styles.statusTextRejected,
+                          ? styles.statusAccepted
+                          : styles.statusRejected,
                       ]}
                     >
-                      {request.status.charAt(0).toUpperCase() +
-                        request.status.slice(1).toLowerCase()}
-                    </Text>
-                  </View>
-                )}
-                <View style={styles.requestDivider} />
-              </View>
-            ))
-          ) : (
-            <Text style={styles.noRequestsText}>No requests yet.</Text>
-          )}
-        </View>
+                      <Text
+                        style={[
+                          styles.statusText,
+                          request.status === 'ACCEPTED'
+                            ? styles.statusTextAccepted
+                            : styles.statusTextRejected,
+                        ]}
+                      >
+                        {request.status.charAt(0).toUpperCase() +
+                          request.status.slice(1).toLowerCase()}
+                      </Text>
+                    </View>
+                  )}
+                  <View style={styles.requestDivider} />
+                </View>
+              ))
+            ) : (
+              <Text style={styles.noRequestsText}>No requests yet.</Text>
+            )}
+          </View>
+        ) : null}
 
         {/* Rider Info Card */}
         <View style={styles.card}>
