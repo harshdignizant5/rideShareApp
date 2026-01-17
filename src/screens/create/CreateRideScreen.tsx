@@ -131,6 +131,18 @@ const CreateRideScreen = () => {
       return;
     }
 
+    // Check if start and destination are the same
+    if (
+      startLocation.trim().toLowerCase() === destination.trim().toLowerCase()
+    ) {
+      Toast.show({
+        type: 'error',
+        text1: 'Validation Error',
+        text2: 'Start and destination locations cannot be the same',
+      });
+      return;
+    }
+
     // Ensure start location coordinates are available
     if (!selectedStart || !selectedStart.lat || !selectedStart.lon) {
       Toast.show({

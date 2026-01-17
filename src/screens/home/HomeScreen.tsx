@@ -174,13 +174,16 @@ const HomeScreen = () => {
         )}&format=json&addressdetails=1&limit=5&countrycodes=in`,
         {
           headers: {
-            'User-Agent': 'BikeSharingApp',
+            'User-Agent': 'BikeSharingApp/1.0',
+            Accept: 'application/json',
           },
         },
       );
       const data = await response.json();
       setSuggestions(data);
     } catch (error) {
+      console.log('Error fetching locations:error', error);
+
       console.error('Error fetching locations:', error);
     } finally {
       setIsSearching(false);
@@ -328,9 +331,7 @@ const HomeScreen = () => {
           onRefresh={fetchRides}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>
-                No rides available nearby 2 KM
-              </Text>
+              <Text style={styles.emptyText}>No rides available nearby</Text>
             </View>
           }
         />

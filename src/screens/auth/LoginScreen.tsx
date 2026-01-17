@@ -26,6 +26,7 @@ import { RootStackParamList } from '../../navigation/types';
 import { perfectSize, scaleAndClampFontSize } from '../../utils/dimensions';
 import { colors } from '../../utils/colors';
 import Button from '../../components/common/Button';
+import { Bike } from 'lucide-react-native';
 
 const LoginScreen = () => {
   const navigation =
@@ -87,7 +88,7 @@ const LoginScreen = () => {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.logoContainer}>
             <View style={styles.logoCircle}>
-              <Text style={styles.logoIcon}>🚲</Text>
+              <Bike size={scaleAndClampFontSize(40)} color={colors.textWhite} />
             </View>
             <Text style={styles.appName}>Digni Ride</Text>
             <Text style={styles.tagline}>

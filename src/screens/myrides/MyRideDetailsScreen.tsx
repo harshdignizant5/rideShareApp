@@ -23,13 +23,25 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { SET_CREATED_RIDES } from '@store/reducers/appReducer';
 import Toast from 'react-native-toast-message';
+import {
+  ArrowLeft,
+  Trash2,
+  MapPin,
+  Flag,
+  Clock,
+  User,
+  MessageCircle,
+  Activity,
+  Inbox,
+} from 'lucide-react-native';
 
 const MyRideDetailsScreen = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'MyRideDetails'>>();
 
-  const { ride: initialRide } = route.params;
+  const { ride: initialRide, showRequestsBadge } = route.params;
+  console.log('route', route, showRequestsBadge);
 
   const dispatch = useDispatch();
   const createdRides = useSelector(
@@ -42,6 +54,7 @@ const MyRideDetailsScreen = () => {
   const [loading, setLoading] = useState(false);
   const [requests, setRequests] = useState<any[]>([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
+  console.log('ride:ride', initialRide);
 
   React.useEffect(() => {
     if (ride?.id) {
@@ -188,7 +201,7 @@ const MyRideDetailsScreen = () => {
           onPress={handleDeleteRide}
           style={styles.deleteButtonHeader}
         >
-          <Text style={styles.deleteButtonTextHeader}>🗑️</Text>
+          <Trash2 size={scaleAndClampFontSize(20)} color={colors.textPrimary} />
         </TouchableOpacity>
       </View>
 
@@ -201,7 +214,7 @@ const MyRideDetailsScreen = () => {
             {/* Start Location */}
             <View style={styles.timelineContainer}>
               <View style={[styles.dot, { backgroundColor: '#D3F9D8' }]}>
-                <Text style={{ fontSize: 10 }}>📍</Text>
+                <MapPin size={12} color="#22C55E" fill="#22C55E" />
               </View>
               <View style={styles.routeItem}>
                 <Text style={styles.routeLabel}>Start Location</Text>
@@ -212,7 +225,7 @@ const MyRideDetailsScreen = () => {
             {/* End Location */}
             <View style={styles.routeTextContainer}>
               <View style={[styles.dot, { backgroundColor: '#E7F5FF' }]}>
-                <Text style={{ fontSize: 10 }}>🏁</Text>
+                <Flag size={12} color="#3B82F6" fill="#3B82F6" />
               </View>
               <View style={{ height: perfectSize(24) }} />
               <View style={styles.routeItem}>
@@ -225,7 +238,11 @@ const MyRideDetailsScreen = () => {
           <View style={styles.divider} />
 
           <View style={styles.timeRow}>
-            <Text style={styles.timeIcon}>🕒</Text>
+            <Clock
+              size={scaleAndClampFontSize(16)}
+              color={colors.textSecondary}
+              style={{ marginRight: perfectSize(8) }}
+            />
             <Text style={styles.timeText}>{ride.time}</Text>
           </View>
         </View>
@@ -241,7 +258,10 @@ const MyRideDetailsScreen = () => {
                 <View style={styles.requesterHeader}>
                   <View style={styles.requesterInfo}>
                     <View style={styles.avatarPlaceholder}>
-                      <Text style={styles.avatarText}>👤</Text>
+                      <User
+                        size={scaleAndClampFontSize(16)}
+                        color={colors.textPrimary}
+                      />
                     </View>
                     <View>
                       <Text style={styles.requesterName}>
@@ -256,7 +276,16 @@ const MyRideDetailsScreen = () => {
 
                 {request.note && (
                   <View style={styles.noteBubble}>
-                    <Text style={styles.noteContent}>💬 {request.note}</Text>
+                    <View
+                      style={{ flexDirection: 'row', alignItems: 'center' }}
+                    >
+                      <MessageCircle
+                        size={14}
+                        color={colors.textPrimary}
+                        style={{ marginRight: 4 }}
+                      />
+                      <Text style={styles.noteContent}>{request.note}</Text>
+                    </View>
                   </View>
                 )}
 
@@ -310,15 +339,27 @@ const MyRideDetailsScreen = () => {
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Ride Details</Text>
           <View style={styles.infoRow}>
-            <Text style={styles.infoIcon}>👤 </Text>
+            <User
+              size={scaleAndClampFontSize(16)}
+              color={colors.textTertiary}
+              style={{ marginRight: perfectSize(8) }}
+            />
             <Text style={styles.infoText}>Posted by You ({ride.user})</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoIcon}>📊 </Text>
+            <Activity
+              size={scaleAndClampFontSize(16)}
+              color={colors.textTertiary}
+              style={{ marginRight: perfectSize(8) }}
+            />
             <Text style={styles.infoText}>Status: {ride.status}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoIcon}>📬 </Text>
+            <Inbox
+              size={scaleAndClampFontSize(16)}
+              color={colors.textTertiary}
+              style={{ marginRight: perfectSize(8) }}
+            />
             <Text style={styles.infoText}>{ride.requests || 0} Request(s)</Text>
           </View>
         </View>
@@ -333,19 +374,21 @@ const MyRideDetailsScreen = () => {
       </ScrollView>
 
       {/* Footer - Delete Button */}
-      <View style={styles.footer}>
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={handleDeleteRide}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color={colors.textWhite} />
-          ) : (
-            <Text style={styles.deleteButtonText}>Delete Ride</Text>
-          )}
-        </TouchableOpacity>
-      </View>
+      {showRequestsBadge && initialRide?.status === 'OPEN' ? (
+        <View style={styles.footer}>
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={handleDeleteRide}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color={colors.textWhite} />
+            ) : (
+              <Text style={styles.deleteButtonText}>Delete Ride</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      ) : null}
     </SafeAreaView>
   );
 };

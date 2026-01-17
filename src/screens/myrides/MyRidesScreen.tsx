@@ -29,16 +29,18 @@ import { perfectSize, scaleAndClampFontSize } from '../../utils/dimensions';
 import { colors } from '../../utils/colors';
 import RideCard, { RideData } from '../../components/RideCard';
 
-
 const MyRidesScreen = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const route = useRoute<any>();
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState<'created' | 'joined'>('created');
 
   const [joinedRides, setJoinedRides] = useState<RideData[]>([]);
-  const createdRides = useSelector((state: any) => state.appReducer.createdRides);
+  const createdRides = useSelector(
+    (state: any) => state.appReducer.createdRides,
+  );
   const [loading, setLoading] = useState(false);
 
   /* eslint-disable react-hooks/exhaustive-deps */
@@ -80,10 +82,13 @@ const MyRidesScreen = () => {
           user: ride.rider.name,
           status: ride.status,
           requests: ride.requestCount || 0,
-          ...ride
+          ...ride,
         }));
         // Sort by createdAt desc (newest first)
-        mappedRides.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        mappedRides.sort(
+          (a: any, b: any) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        );
         dispatch({ type: SET_CREATED_RIDES, payload: mappedRides });
       }
     } catch (error: any) {
@@ -140,39 +145,40 @@ const MyRidesScreen = () => {
   };
 
   const handleDeleteRide = (rideId: string) => {
-    Alert.alert(
-      "Delete Ride",
-      "Are you sure you want to delete this ride?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              setLoading(true);
-              await deleteRide(rideId);
-              Toast.show({
-                type: 'success',
-                text1: 'Ride Deleted',
-                text2: 'Ride successfully deleted.'
-              });
-              // Remove locally instead of refetching
-              dispatch({ type: SET_CREATED_RIDES, payload: createdRides.filter((ride: RideData) => ride.id !== rideId) });
-            } catch (error: any) {
-              console.error("Delete Ride Error:", error);
-              Toast.show({
-                type: 'error',
-                text1: 'Delete Failed',
-                text2: 'Could not delete ride.'
-              });
-            } finally {
-              setLoading(false);
-            }
+    Alert.alert('Delete Ride', 'Are you sure you want to delete this ride?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            setLoading(true);
+            await deleteRide(rideId);
+            Toast.show({
+              type: 'success',
+              text1: 'Ride Deleted',
+              text2: 'Ride successfully deleted.',
+            });
+            // Remove locally instead of refetching
+            dispatch({
+              type: SET_CREATED_RIDES,
+              payload: createdRides.filter(
+                (ride: RideData) => ride.id !== rideId,
+              ),
+            });
+          } catch (error: any) {
+            console.error('Delete Ride Error:', error);
+            Toast.show({
+              type: 'error',
+              text1: 'Delete Failed',
+              text2: 'Could not delete ride.',
+            });
+          } finally {
+            setLoading(false);
           }
-        }
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   /* eslint-disable react/no-unstable-nested-components */
@@ -180,8 +186,15 @@ const MyRidesScreen = () => {
     <RideCard
       item={item}
       showRequestsBadge={activeTab === 'created'}
-      onDelete={activeTab === 'created' ? () => handleDeleteRide(item.id) : undefined}
-      onPress={() => navigation.navigate('MyRideDetails', { ride: item })}
+      onDelete={
+        activeTab === 'created' ? () => handleDeleteRide(item.id) : undefined
+      }
+      onPress={() => {
+        navigation.navigate('MyRideDetails', {
+          ride: item,
+          showRequestsBadge: activeTab === 'created',
+        });
+      }}
     />
   );
   /* eslint-enable react/no-unstable-nested-components */

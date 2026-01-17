@@ -67,11 +67,11 @@ const RideCard: React.FC<RideCardProps> = ({
         </View>
 
         <View style={styles.headerRightAction}>
-          {onDelete && (
+          {/* {onDelete && (
             <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
               <Trash2 size={scaleAndClampFontSize(18)} color="red" />
             </TouchableOpacity>
-          )}
+          )} */}
 
           {showRequestsBadge && typeof item.requests === 'number' ? (
             <View style={styles.requestBadge}>
@@ -109,7 +109,7 @@ const RideCard: React.FC<RideCardProps> = ({
 
         <View style={styles.statusBadge}>
           <Text style={styles.statusText}>
-            {item.requestStatus || item.status}
+            {item.requestStatus?.toLowerCase() || item.status?.toLowerCase()}
           </Text>
         </View>
       </View>

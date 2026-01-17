@@ -21,6 +21,7 @@ import Toast from 'react-native-toast-message';
 import { verifyOtp } from '@services/authServices/authServices';
 import { setJWTToken, setUserData } from '@store/actions/authActions';
 import { Alert } from 'react-native';
+import { Bike } from 'lucide-react-native';
 
 const OtpScreen = () => {
   const navigation =
@@ -127,7 +128,7 @@ const OtpScreen = () => {
         <View style={styles.content}>
           <View style={styles.logoContainer}>
             <View style={styles.logoCircle}>
-              <Text style={styles.logoIcon}>🚲</Text>
+              <Bike size={scaleAndClampFontSize(40)} color={colors.textWhite} />
             </View>
             <Text style={styles.appName}>Digni Ride</Text>
             <Text style={styles.tagline}>
