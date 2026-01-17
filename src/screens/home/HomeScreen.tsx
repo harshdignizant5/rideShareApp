@@ -24,7 +24,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getRides } from '@services/authServices/authServices';
 import Toast from 'react-native-toast-message';
 import { debounce } from 'lodash';
-import { SET_RIDES, SET_USER_LOCATION } from '../../store/reducers/homeReducer';
+import { SET_RIDES, SET_USER_LOCATION } from '../../store/reducers/appReducer';
+
+
+
 
 // Mock Data
 const RIDES = [
@@ -60,8 +63,8 @@ const HomeScreen = () => {
   const dispatch = useDispatch();
   const [search, setSearch] = useState('');
   // Use Redux state
-  const rides = useSelector((state: any) => state.homeReducer.rides);
-  const userLocation = useSelector((state: any) => state.homeReducer.userLocation);
+  const rides = useSelector((state: any) => state.appReducer.rides);
+  const userLocation = useSelector((state: any) => state.appReducer.userLocation);
 
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);

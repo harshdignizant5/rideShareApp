@@ -43,6 +43,10 @@ export const requestRide = async (rideId: string, data: any) => {
   return callApiPost({ url: `/rides/${rideId}/request`, data });
 };
 
+export const deleteRide = async (rideId: string) => {
+    return callApiDelete({ url: `/rides/${rideId}` });
+};
+
 export const verifyUser = async (data: any) => {
   return callApiPost({ url: ENDPOINTS.REGISTER, data });
 };

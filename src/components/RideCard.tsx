@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { colors } from '../utils/colors';
 import { perfectSize, scaleAndClampFontSize } from '../utils/dimensions';
-import { MapPin, Clock, User, ChevronRight } from 'lucide-react-native';
+import { MapPin, Clock, User, ChevronRight, Trash2 } from 'lucide-react-native';
 
 export interface RideData {
   id: string;
@@ -26,6 +26,7 @@ interface RideCardProps {
   onPress?: () => void;
   showRequestsBadge?: boolean;
   style?: ViewStyle;
+  onDelete?: () => void;
 }
 
 const RideCard: React.FC<RideCardProps> = ({
@@ -33,6 +34,7 @@ const RideCard: React.FC<RideCardProps> = ({
   onPress,
   showRequestsBadge = false,
   style,
+  onDelete,
 }) => {
   const Container = onPress ? TouchableOpacity : View;
 
@@ -64,24 +66,32 @@ const RideCard: React.FC<RideCardProps> = ({
           </View>
         </View>
 
-        {showRequestsBadge && typeof item.requests === 'number' ? (
-          <View style={styles.requestBadge}>
-            <Text style={styles.requestText}>
-              {item.requests} request{item.requests !== 1 ? 's' : ''}
-            </Text>
-          </View>
-        ) : item.hasRequested ? (
-          <View style={styles.requestedBadge}>
-            <Text style={styles.requestedText}>Requested</Text>
-          </View>
-        ) : (
-          <View style={styles.chevronContainer}>
-            <ChevronRight
-              size={scaleAndClampFontSize(20)}
-              color={colors.textPlaceholder}
-            />
-          </View>
-        )}
+        <View style={styles.headerRightAction}>
+          {onDelete && (
+            <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
+              <Trash2 size={scaleAndClampFontSize(18)} color="red" />
+            </TouchableOpacity>
+          )}
+
+          {showRequestsBadge && typeof item.requests === 'number' ? (
+            <View style={styles.requestBadge}>
+              <Text style={styles.requestText}>
+                {item.requests} request{item.requests !== 1 ? 's' : ''}
+              </Text>
+            </View>
+          ) : item.hasRequested ? (
+            <View style={styles.requestedBadge}>
+              <Text style={styles.requestedText}>Requested</Text>
+            </View>
+          ) : (
+            <View style={styles.chevronContainer}>
+              <ChevronRight
+                size={scaleAndClampFontSize(20)}
+                color={colors.textPlaceholder}
+              />
+            </View>
+          )}
+        </View>
       </View>
 
       <View style={styles.divider} />
@@ -145,6 +155,14 @@ const styles = StyleSheet.create({
     fontSize: scaleAndClampFontSize(16),
     fontWeight: '500',
     color: colors.textPrimary,
+    width: '85%',
+  },
+  headerRightAction: {
+    alignItems: 'flex-end',
+    gap: perfectSize(8),
+  },
+  deleteButton: {
+    padding: perfectSize(4),
   },
   chevronContainer: {
     justifyContent: 'center',

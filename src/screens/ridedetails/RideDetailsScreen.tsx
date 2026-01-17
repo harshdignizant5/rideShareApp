@@ -25,7 +25,7 @@ const RideDetailsScreen = () => {
   console.log("rideId:::", rideId);
 
   // Fetch ride details from Redux store using rideId
-  const rides = useSelector((state: any) => state.homeReducer.rides);
+  const rides = useSelector((state: any) => state.appReducer.rides);
   const updatedRide = rides.find((ride: any) => ride.id === rideId);
   const [message, setMessage] = useState('');
 

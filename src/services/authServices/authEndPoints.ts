@@ -23,6 +23,6 @@ export const ENDPOINTS = {
   VERIFY_LOGIN: '/auth/verify-login',
   ALTERNATE_EMAIL_RESEND: '/auth/email/alternative-email-resend',
   ALTERNATE_EMAIL_DELETE: '/auth/email/alternative-email-delete',
-  LOGOUT: '/api/v1/auth/logout',
+  LOGOUT: '/auth/logout',
   GET_JOINED_RIDES: `/rides/me/joined`,
 };

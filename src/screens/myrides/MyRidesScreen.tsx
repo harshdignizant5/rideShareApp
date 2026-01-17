@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,30 +6,37 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
-import {
-  getCreatedRides,
-  getJoinedRides,
-} from '@services/authServices/authServices';
-import Toast from 'react-native-toast-message';
-import { useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { perfectSize, scaleAndClampFontSize } from '../../utils/dimensions';
-import { colors } from '../../utils/colors';
-import RideCard, { RideData } from '../../components/RideCard';
+import Toast from 'react-native-toast-message';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   useFocusEffect,
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import { useCallback } from 'react';
+
+import {
+  getCreatedRides,
+  getJoinedRides,
+  deleteRide,
+} from '@services/authServices/authServices';
+import { SET_CREATED_RIDES } from '@store/reducers/appReducer';
+import { perfectSize, scaleAndClampFontSize } from '../../utils/dimensions';
+import { colors } from '../../utils/colors';
+import RideCard, { RideData } from '../../components/RideCard';
+
 
 const MyRidesScreen = () => {
   const navigation = useNavigation();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const route = useRoute<any>();
+  const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState<'created' | 'joined'>('created');
-  const [createdRides, setCreatedRides] = useState<RideData[]>([]);
+
   const [joinedRides, setJoinedRides] = useState<RideData[]>([]);
+  const createdRides = useSelector((state: any) => state.appReducer.createdRides);
   const [loading, setLoading] = useState(false);
 
   /* eslint-disable react-hooks/exhaustive-deps */
@@ -70,15 +77,12 @@ const MyRidesScreen = () => {
           }),
           user: ride.rider.name,
           status: ride.status,
-          requests: ride._count?.requests || 0,
-          ...ride,
+          requests: ride.requestCount || 0,
+          ...ride
         }));
         // Sort by createdAt desc (newest first)
-        mappedRides.sort(
-          (a: any, b: any) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        );
-        setCreatedRides(mappedRides);
+        mappedRides.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        dispatch({ type: SET_CREATED_RIDES, payload: mappedRides });
       }
     } catch (error: any) {
       console.error('Fetch My Created Rides Error:', error);
@@ -133,10 +137,51 @@ const MyRidesScreen = () => {
     }
   };
 
+  const handleDeleteRide = (rideId: string) => {
+    Alert.alert(
+      "Delete Ride",
+      "Are you sure you want to delete this ride?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await deleteRide(rideId);
+              Toast.show({
+                type: 'success',
+                text1: 'Ride Deleted',
+                text2: 'Ride successfully deleted.'
+              });
+              // Remove locally instead of refetching
+              dispatch({ type: SET_CREATED_RIDES, payload: createdRides.filter((ride: RideData) => ride.id !== rideId) });
+            } catch (error: any) {
+              console.error("Delete Ride Error:", error);
+              Toast.show({
+                type: 'error',
+                text1: 'Delete Failed',
+                text2: 'Could not delete ride.'
+              });
+            } finally {
+              setLoading(false);
+            }
+          }
+        }
+      ]
+    );
+  };
+
   /* eslint-disable react/no-unstable-nested-components */
   const renderItem = ({ item }: { item: RideData }) => (
-    <RideCard item={item} showRequestsBadge={activeTab === 'created'} />
+    <RideCard
+      item={item}
+      showRequestsBadge={activeTab === 'created'}
+      onDelete={activeTab === 'created' ? () => handleDeleteRide(item.id) : undefined}
+    />
   );
+  /* eslint-enable react/no-unstable-nested-components */
   /* eslint-enable react/no-unstable-nested-components */
 
   return (
