@@ -39,7 +39,8 @@ interface LocationResult {
 }
 
 const CreateRideScreen = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [startLocation, setStartLocation] = useState('');
   const [destination, setDestination] = useState('');
   const [date, setDate] = useState(new Date());
@@ -61,7 +62,9 @@ const CreateRideScreen = () => {
   );
 
   // Selected Location Objects
-  const [selectedStart, setSelectedStart] = useState<LocationResult | null>(null);
+  const [selectedStart, setSelectedStart] = useState<LocationResult | null>(
+    null,
+  );
   const [selectedDest, setSelectedDest] = useState<LocationResult | null>(null);
 
   // Function to fetch locations from Nominatim
@@ -114,7 +117,7 @@ const CreateRideScreen = () => {
       Toast.show({
         type: 'error',
         text1: 'Validation Error',
-        text2: 'Please enter a start location'
+        text2: 'Please enter a start location',
       });
       return;
     }
@@ -123,7 +126,7 @@ const CreateRideScreen = () => {
       Toast.show({
         type: 'error',
         text1: 'Validation Error',
-        text2: 'Please enter a destination'
+        text2: 'Please enter a destination',
       });
       return;
     }
@@ -133,7 +136,8 @@ const CreateRideScreen = () => {
       Toast.show({
         type: 'error',
         text1: 'Validation Error',
-        text2: 'Please select a start location from the suggestions to get coordinates.'
+        text2:
+          'Please select a start location from the suggestions to get coordinates.',
       });
       return;
     }
@@ -143,7 +147,8 @@ const CreateRideScreen = () => {
       Toast.show({
         type: 'error',
         text1: 'Validation Error',
-        text2: 'Please select a destination from the suggestions to get accurate coordinates.'
+        text2:
+          'Please select a destination from the suggestions to get accurate coordinates.',
       });
       return;
     }
@@ -152,7 +157,7 @@ const CreateRideScreen = () => {
       Toast.show({
         type: 'error',
         text1: 'Validation Error',
-        text2: 'Please select a departure date and time'
+        text2: 'Please select a departure date and time',
       });
       return;
     }
@@ -163,7 +168,7 @@ const CreateRideScreen = () => {
       Toast.show({
         type: 'error',
         text1: 'Invalid Date/Time',
-        text2: 'Please select a future date and time for your ride'
+        text2: 'Please select a future date and time for your ride',
       });
       return;
     }
@@ -173,15 +178,15 @@ const CreateRideScreen = () => {
       startLocation: {
         lat: parseFloat(selectedStart.lat),
         lng: parseFloat(selectedStart.lon),
-        address: startLocation
+        address: startLocation,
       },
       endLocation: {
         lat: parseFloat(selectedDest.lat),
         lng: parseFloat(selectedDest.lon),
-        address: destination
+        address: destination,
       },
       departureTime: date.toISOString(),
-      note: note || "" // Ensure note is at least an empty string
+      note: note || '', // Ensure note is at least an empty string
     };
 
     console.log('Creating ride payload:', payload);
@@ -189,13 +194,13 @@ const CreateRideScreen = () => {
 
     try {
       const response = await createRide(payload);
-      console.log("Create Ride Response:", response?.data);
+      console.log('Create Ride Response:', response?.data);
 
       if (response) {
         Toast.show({
           type: 'success',
           text1: 'Ride Created',
-          text2: 'Your ride has been successfully published!'
+          text2: 'Your ride has been successfully published!',
         });
         // Reset form or navigate
         setStartLocation('');
@@ -206,14 +211,17 @@ const CreateRideScreen = () => {
         setDate(new Date());
         setIsDateSelected(false);
 
-        navigation.navigate('Main', { screen: 'MyRidesTab', params: { tab: 'created' } });
+        navigation.navigate('Main', {
+          screen: 'MyRidesTab',
+          params: { tab: 'created' },
+        });
       }
     } catch (error: any) {
-      console.error("Create Ride Error:", error);
+      console.error('Create Ride Error:', error);
       Toast.show({
         type: 'error',
         text1: 'Failed to Create Ride',
-        text2: error.message || 'Something went wrong.'
+        text2: error.message || 'Something went wrong.',
       });
     } finally {
       setIsLoading(false);
@@ -269,7 +277,7 @@ const CreateRideScreen = () => {
         Toast.show({
           type: 'error',
           text1: 'Invalid Time',
-          text2: 'Please select a future date and time'
+          text2: 'Please select a future date and time',
         });
         return;
       }
@@ -303,7 +311,7 @@ const CreateRideScreen = () => {
           keyboardShouldPersistTaps="handled"
         >
           <Text style={styles.instructions}>
-            Share your journey and find a pillion passenger
+            Share your journey and find a digni Ride passenger
           </Text>
 
           {/* Start Location */}
@@ -413,12 +421,12 @@ const CreateRideScreen = () => {
               >
                 {isDateSelected
                   ? date.toLocaleString([], {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })
                   : 'Select date & time'}
               </Text>
               <Text style={styles.calendarIcon}>📅</Text>
@@ -506,7 +514,7 @@ const CreateRideScreen = () => {
 
           {/* Create Button */}
           <Button
-            title={isLoading ? "Creating Ride..." : "Create Ride"}
+            title={isLoading ? 'Creating Ride...' : 'Create Ride'}
             onPress={handleCreateRide}
             disabled={isLoading}
             variant="secondary"

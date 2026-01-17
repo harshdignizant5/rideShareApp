@@ -11,7 +11,12 @@ import {
   Alert,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginSuccess, setJWTToken, setLoginData, setUserData } from '@store/actions/authActions';
+import {
+  loginSuccess,
+  setJWTToken,
+  setLoginData,
+  setUserData,
+} from '@store/actions/authActions';
 import { authLogin } from '@services/authServices/authServices';
 import { RootState } from '@store/index';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -27,12 +32,14 @@ const LoginScreen = () => {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const dispatch = useDispatch();
 
-  const loginData = useSelector((state: RootState) => state.authReducer.loginData);
+  const loginData = useSelector(
+    (state: RootState) => state.authReducer.loginData,
+  );
   const [isLoading, setIsLoading] = useState(false);
 
-  console.log("loginData 111", loginData);
+  console.log('loginData 111', loginData);
 
-  const [phoneNumber, setPhoneNumber] = useState('7434023679');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [name, setName] = useState('');
   const [city, setCity] = useState('');
 
@@ -40,9 +47,9 @@ const LoginScreen = () => {
   const JWTToken = useSelector((state: any) => state.authReducer.JWTToken);
   const userData = useSelector((state: any) => state.authReducer.userData);
 
-  console.log("1111111 loginData", loginData);
-  console.log("1111111 JWTToken", JWTToken);
-  console.log("1111111 userData", userData);
+  console.log('1111111 loginData', loginData);
+  console.log('1111111 JWTToken', JWTToken);
+  console.log('1111111 userData', userData);
 
   const handleContinue = async () => {
     // navigation.navigate('Otp', { phoneNumber });
@@ -52,21 +59,20 @@ const LoginScreen = () => {
       const response = await authLogin({
         phone: phoneNumber,
         name: name,
-        city: city
+        city: city,
       });
-      console.log("responseresponse", response);
+      console.log('responseresponse', response);
 
       if (response?.data) {
         // Dispatch to reducer
         dispatch(setLoginData(response?.data?.data));
 
         navigation.navigate('Otp', { phoneNumber });
-
       }
     } catch (error: any) {
-      console.log("responseresponse error", error);
+      console.log('responseresponse error', error);
 
-      Alert.alert("Error", error.message || "Login failed");
+      Alert.alert('Error', error.message || 'Login failed');
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +89,7 @@ const LoginScreen = () => {
             <View style={styles.logoCircle}>
               <Text style={styles.logoIcon}>🚲</Text>
             </View>
-            <Text style={styles.appName}>Pillion</Text>
+            <Text style={styles.appName}>Digni Ride</Text>
             <Text style={styles.tagline}>
               Share the ride, share the journey
             </Text>
@@ -119,7 +125,7 @@ const LoginScreen = () => {
             /> */}
 
             <Button
-              title={isLoading ? "Loading..." : "Continue"}
+              title={isLoading ? 'Loading...' : 'Continue'}
               onPress={handleContinue}
               disabled={isLoading || phoneNumber.length !== 10}
             />

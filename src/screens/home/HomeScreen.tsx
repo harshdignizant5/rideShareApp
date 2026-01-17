@@ -159,6 +159,8 @@ const HomeScreen = () => {
   };
 
   const searchLocations = async (query: string) => {
+    console.log('🚀 HomeScreen: searchLocations', query);
+
     if (!query || query.length < 3) {
       setSuggestions([]);
       return;
@@ -326,7 +328,9 @@ const HomeScreen = () => {
           onRefresh={fetchRides}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No rides available nearby 2 KM</Text>
+              <Text style={styles.emptyText}>
+                No rides available nearby 2 KM
+              </Text>
             </View>
           }
         />

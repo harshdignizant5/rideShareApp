@@ -129,7 +129,7 @@ const OtpScreen = () => {
             <View style={styles.logoCircle}>
               <Text style={styles.logoIcon}>🚲</Text>
             </View>
-            <Text style={styles.appName}>Pillion</Text>
+            <Text style={styles.appName}>Digni Ride</Text>
             <Text style={styles.tagline}>
               Share the ride, share the journey
             </Text>
@@ -155,7 +155,7 @@ const OtpScreen = () => {
             <Button
               title={isLoading ? 'Verifying...' : 'Verify & Continue'}
               onPress={handleVerify}
-              disabled={isLoading}
+              disabled={isLoading || code.length < 6}
               style={{ marginBottom: perfectSize(24) }}
             />
 

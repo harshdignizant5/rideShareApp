@@ -32,20 +32,18 @@ const RegisterScreen = () => {
   const JWTToken = useSelector((state: any) => state.authReducer.JWTToken);
   const userData = useSelector((state: any) => state.authReducer.userData);
 
+  console.log('22222 JWTToken', JWTToken, phoneNumber, params, userData);
 
-
-  console.log("22222 JWTToken", JWTToken, phoneNumber, params, userData);
-
-  const [fullName, setFullName] = useState('keval');
+  const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState(userData?.phoneNumber);
-  const [city, setCity] = useState('surat');
-  const [vehicleNumber, setVehicleNumber] = useState('GJ-05-ME7800');
+  const [city, setCity] = useState('');
+  const [vehicleNumber, setVehicleNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    setPhone(userData?.phoneNumber)
-  }, [userData])
+    setPhone(userData?.phoneNumber);
+  }, [userData]);
 
   const handleSave = async () => {
     if (!fullName || !city || !vehicleNumber) {
@@ -58,35 +56,42 @@ const RegisterScreen = () => {
       const payload = {
         name: fullName,
         city: city,
-        vehicleNumber: vehicleNumber
+        vehicleNumber: vehicleNumber,
       };
 
-      console.log("Updating user with payload:", payload);
+      console.log('Updating user with payload:', payload);
 
       // updateUser uses baseApi PUT which handles token automatically if in Redux
       // or we need to ensure the token is available
       const response = await updateUser(payload);
-      console.log("Updating user with payload: response", response);
-      if (response) { // baseApi or axiosInstance usually returns the response object
+      console.log('Updating user with payload: response', response);
+      if (response) {
+        // baseApi or axiosInstance usually returns the response object
         Toast.show({
           type: 'success',
           text1: 'Profile Updated',
-          text2: 'Your details have been saved successfully.'
+          text2: 'Your details have been saved successfully.',
         });
-        if (response.data.data) { // Assuming user object might be in data.data or similar
-          dispatch(setUserData({ ...userData, ...response.data.data, isReregister: true }));
+        if (response.data.data) {
+          // Assuming user object might be in data.data or similar
+          dispatch(
+            setUserData({
+              ...userData,
+              ...response.data.data,
+              isReregister: true,
+            }),
+          );
         }
         navigation.navigate('Main', { screen: 'HomeTab' });
       }
-
     } catch (error: any) {
-      console.log("Updating user with payload: error", error?.response);
+      console.log('Updating user with payload: error', error?.response);
 
-      console.error("Update User Error:", error);
+      console.error('Update User Error:', error);
       Toast.show({
         type: 'error',
         text1: 'Update Failed',
-        text2: error.message || 'Could not update profile.'
+        text2: error.message || 'Could not update profile.',
       });
     } finally {
       setIsLoading(false);
@@ -151,7 +156,7 @@ const RegisterScreen = () => {
             </View>
 
             <Button
-              title={isLoading ? "Saving..." : "Save & Continue"}
+              title={isLoading ? 'Saving...' : 'Save & Continue'}
               onPress={handleSave}
               disabled={isLoading}
               style={{ marginTop: perfectSize(24) }}

@@ -49,8 +49,8 @@ const RideCard: React.FC<RideCardProps> = ({
           <View style={styles.locationRow}>
             <MapPin
               size={scaleAndClampFontSize(16)}
-              color={colors.textTertiary}
-              fill="none"
+              color="#22C55E"
+              fill="#22C55E"
               strokeWidth={2}
             />
             <Text style={styles.locationText}>{item.from}</Text>
@@ -58,8 +58,8 @@ const RideCard: React.FC<RideCardProps> = ({
           <View style={styles.locationRow}>
             <MapPin
               size={scaleAndClampFontSize(16)}
-              color={colors.textPrimary}
-              fill={colors.textPrimary}
+              color="#EF4444"
+              fill="#EF4444"
               strokeWidth={2}
             />
             <Text style={styles.locationText}>{item.to}</Text>
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   requestBadge: {
-    backgroundColor: colors.accent,
+    backgroundColor: colors.secondary,
     paddingHorizontal: perfectSize(8),
     paddingVertical: perfectSize(4),
     borderRadius: perfectSize(8),
